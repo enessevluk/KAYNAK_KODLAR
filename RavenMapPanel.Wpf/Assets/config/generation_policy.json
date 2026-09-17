@@ -1,0 +1,27 @@
+{
+  "format": "raven-generation-policy-v1",
+  "defaults": {
+    "minDistance": 300,
+    "flatRadius": 80,
+    "maxHeightDelta": 18
+  },
+  "monuments": {
+    "launch_site": { "minDistance": 520, "flatRadius": 190, "maxHeightDelta": 12 },
+    "airfield": { "minDistance": 470, "flatRadius": 175, "maxHeightDelta": 12 },
+    "excavator": { "minDistance": 430, "flatRadius": 160, "maxHeightDelta": 14 },
+    "military_tunnels": { "minDistance": 400, "flatRadius": 145, "maxHeightDelta": 14 },
+    "trainyard": { "minDistance": 390, "flatRadius": 140, "maxHeightDelta": 14 },
+    "powerplant": { "minDistance": 360, "flatRadius": 130, "maxHeightDelta": 16 },
+    "water_treatment": { "minDistance": 360, "flatRadius": 130, "maxHeightDelta": 16 },
+    "oilrig_large": { "minDistance": 420, "flatRadius": 80, "maxHeightDelta": 18 },
+    "oilrig_small": { "minDistance": 420, "flatRadius": 80, "maxHeightDelta": 18 },
+    "underwater_labs": { "minDistance": 420, "flatRadius": 80, "maxHeightDelta": 18 },
+    "harbor": { "minDistance": 320, "flatRadius": 95, "maxHeightDelta": 18 },
+    "ferry_terminal": { "minDistance": 320, "flatRadius": 95, "maxHeightDelta": 18 },
+    "desert_military_base": { "minDistance": 300, "flatRadius": 120, "maxHeightDelta": 18 },
+    "arctic_research_base": { "minDistance": 300, "flatRadius": 120, "maxHeightDelta": 18 },
+    "nuclear_silo": { "minDistance": 300, "flatRadius": 105, "maxHeightDelta": 18 },
+    "outpost": { "minDistance": 300, "flatRadius": 105, "maxHeightDelta": 18 },
+    "bandit_camp": { "minDistance": 300, "flatRadius": 105, "maxHeightDelta": 18 }
+  }
+}

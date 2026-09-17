@@ -1,0 +1,72 @@
+RAVEN v1.7.1 - VDS / SHOPIER KISA REHBER
+=========================================
+
+NORMAL KULLANIMDA AYAR ICIN KOD / BAT / POWERSHELL DUZENLEME YOKTUR.
+Kendi PC'nde build icin sadece KAYNAK_KODLAR\RAVEN.bat kullan.
+VDS'de server yonetimi icin sadece SERVER\RAVEN_SERVER.bat kullan.
+
+ILK VDS ADRESI
+--------------
+Kendi PC'nde yalniz ilk kurulumda veya VDS/domain degisince:
+  RAVEN.bat > 6. ILK KURULUM / VDS ADRESI
+
+Test:
+  PublicBaseUrl = http://VDS_IP:5088
+  Environment   = Development
+
+Production:
+  PublicBaseUrl = https://api.senindomainin.com
+  Environment   = Production
+
+SHOPIER / STANDARD / PREMIUM / DESTEK
+-------------------------------------
+Serveri baslat ve Admin Panel'e gir:
+  http://127.0.0.1:5088/admin
+  veya public Raven adresin + /admin
+
+Admin Panel > Sistem Ayarlari tek normal ayar merkezidir:
+  - Shopier otomatik lisans ac/kapat
+  - Shopier PAT / API Key
+  - Shopier satin alma URL
+  - Shopier API URL
+  - STANDARD Product ID / urun adi / fiyat / sure
+  - PREMIUM Product ID / urun adi / fiyat / sure
+  - Discord / destek URL
+  - Destek butonu adi ve genel destek metni
+
+API Key ekranda tekrar gosterilmez. Degistirmek istemiyorsan yeni PAT alanini bos birak.
+Kaydedilen Shopier ayarlari server restart gerektirmeden uygulanir.
+
+Shopier'de iki ayri dijital urun kullanmak en temiz yapidir:
+  Raven Map Panel Standard -> STANDARD
+  Raven Map Panel Premium  -> PREMIUM
+
+Product ID ile esleme en guvenli yoldur. Product ID yoksa urun adi eslesmesi kullanilir.
+LicenseDays=0 lifetime demektir.
+Musteri siparis notuna 17 haneli SteamID64 yazmalidir.
+
+LISANS IPTAL / ASKIYA ALMA
+--------------------------
+Admin Panel'de lisansi iptal veya askiya alirken bir neden yazabilirsin.
+Client bu nedeni kullaniciya uygun bir ekranla gosterir.
+
+Ornek iptal durumunda client:
+  - Lisansiniz iptal edildi
+  - Admin tarafinda girilen neden (varsa)
+  - Tekrar satin al / yenile aksiyonu
+  - Discord / destek aksiyonu
+
+gosterir. Neden girilmediyse destek kanalina yonlendirir.
+
+SERVER KURULUM / UPDATE
+-----------------------
+Ilk kurulum:
+  RAVEN.bat > F  (ILK VDS FULL / OWNER ONLY)
+  DIST\Server\RavenServer_FULL_OWNER_ONLY_vX.Y.Z.zip -> VDS
+
+Sonraki update:
+  RAVEN.bat > 3  (SERVER UPDATE; update_private.pem ile RSA imzalanir)
+  RavenServer_UPDATE_vX.Y.Z.zip + .zip.sig + .zip.sha256 -> mevcut SERVER klasorune kopyala; RAVEN_SERVER.bat > 6 imzayi dogrular, sonra acar ve uygular
+  VDS: RAVEN_SERVER.bat > 6
+
+Config / Data / Secrets korunur. Normal business ayarlari update ile ezilmez.

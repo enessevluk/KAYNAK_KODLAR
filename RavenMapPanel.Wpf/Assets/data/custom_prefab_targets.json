@@ -1,0 +1,47 @@
+{
+  "format": "raven-custom-prefab-targets-v1",
+  "definitions": [
+    {
+      "monumentId": "outpost",
+      "targets": [
+        "compound.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "bandit_camp",
+      "targets": [
+        "bandit_town.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "stables_a",
+      "targets": [
+        "stables_a.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "stables_b",
+      "targets": [
+        "stables_b.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "fishing_village_a",
+      "targets": [
+        "fishing_village_a.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "fishing_village_b",
+      "targets": [
+        "fishing_village_b.prefab.map"
+      ]
+    },
+    {
+      "monumentId": "fishing_village_c",
+      "targets": [
+        "fishing_village_c.prefab.map"
+      ]
+    }
+  ]
+}

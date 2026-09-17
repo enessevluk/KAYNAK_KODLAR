@@ -1,0 +1,93 @@
+RAVEN v1.7.1 - DUZELTME NOTLARI
+================================
+
+Bu patch surumu v1.7.0 kaynak analizinde bulunan kritik ve orta oncelikli
+sorunlari kapatir.
+
+1) CLIENT UPDATE
+----------------
+- Update paketi SHA-256 + RSA ile dogrulanmaya devam eder.
+- Yeni payload temiz staging klasorune hazirlanir.
+- Maps, Config ve CustomPrefabs kullanici verileri korunur.
+- Mevcut kurulum backup'a tasinir, yeni kurulum atomik klasor degisimiyle devreye alinir.
+- Hata olursa eski kurulum otomatik rollback edilir ve yeniden baslatilir.
+- Eski surumden kalmis gereksiz program dosyalari yeni kuruluma tasinmaz.
+
+2) LISANS AKTIVASYONU
+---------------------
+- Ilk cihaz sahiplenme islemi SQL compare-and-set ile atomik hale getirildi.
+- Iki farkli cihaz ayni anda ilk aktivasyonu denerse ikinci cihaz ilk cihazin
+  activation token'ini artik ezemez.
+- Legacy device hash migration da kosullu update kullanir.
+
+3) GRACE PERIOD
+---------------
+- Client artik 1 gunu sabit varsaymaz.
+- Server Activate/Validate cevabinda GraceEndsUtc dondurur.
+- Client grace bitisini serverdan gelen gercek zamana gore gosterir.
+
+4) OFFLINE TOKEN
+----------------
+- Gecerli RSA imzali ve cihaza bagli offline token uygulama yeniden acildiktan
+  sonra da kullanilabilir.
+- Harita uretimi yine zorunlu online entitlement kontrolu ister; offline token
+  bu kapinin yerine gecmez.
+
+5) SHOPIER
+----------
+- REJECTED siparisler artik kalici olarak kilitlenmez.
+- Admin paneline reddedilen siparis icin "Yeniden Isle" akisi eklendi.
+- Retry sirasinda polling cursor'u siparis zamanina guvenli bicimde geri sarilir.
+- ACCEPTED ve IGNORED_INITIAL_SYNC siparisleri idempotent olarak tekrar uygulanmaz.
+- Kalici shopier_cursor_utc eklendi; her tarama eski baseline'dan baslamaz.
+- Sayfa limiti dolup daha fazla siparis varsa cursor ilerletilmez ve acik hata verilir;
+  sessiz siparis kaybi engellenir.
+
+6) BUILD / TEST KAPILARI
+------------------------
+- CLIENT BUILD ve CLIENT UPDATE oncesinde Core testleri calisir.
+- SERVER UPDATE ZIP'i olusturulmadan once Server testleri calisir.
+- FULL OWNER akisi Core test + client publish smoke + server test kapilarini kullanir.
+
+7) SERVER UPDATE IMZASI
+-----------------------
+- Server UPDATE ZIP'i update_private.pem ile RSA/SHA-256 imzalanir.
+- ZIP yaninda .sig ve .sha256 uretilir.
+- VDS, mevcut Raven.Server.exe ve Secrets/update_public.pem ile paketi dogrulamadan
+  update'i acmaz.
+- Paket icinde server-update-manifest.json bulunur.
+- Config, Data ve Secrets update tarafindan ezilmez; mevcut App rollback mantigi korunur.
+
+ILK GECIS NOTU:
+Bu mekanizma v1.7.1 oncesi VDS updater'inda mevcut degildir. Eski bir VDS'yi ilk kez
+v1.7.1'e getirirken ZIP/.sig/.sha256 dosyalarini yalniz guvenilir owner PC'den VDS'ye
+aktar. En guvenli bootstrap yontemi FULL OWNER kurulumunu veya fiziksel/guvenilir
+owner transferini kullanmaktir. v1.7.1 devreye girdikten sonraki server update'lerinde
+RSA dogrulamasi zorunludur.
+
+8) CORE MIMARISI
+----------------
+- RavenMapPanel.Core gercek bir .csproj oldu.
+- WPF artik Core kaynaklarini tek tek linklemek yerine ProjectReference kullanir.
+- Core test projesi de ProjectReference kullanir.
+- Internal API erisimi kontrollu InternalsVisibleTo ile korunur.
+- Core'un ihtiyac duydugu icon/config/data/Harmony/public-key kaynaklari Core assembly
+  icine embed edilir.
+
+9) TESTLER
+----------
+Yeni regresyon testleri:
+- Iki farkli cihaz ilk aktivasyon yarisi.
+- REJECTED -> RETRY_PENDING -> ACCEPTED Shopier akisi ve cift sure eklememe.
+- Shopier cursor rewind guvenligi.
+- Server update RSA/SHA-256 tamper tespiti.
+
+10) KAYNAK TEMIZLIGI
+--------------------
+Teslim arsivinden bin ve obj build artifaktlari cikarilir.
+
+NOT:
+Kaynak bu calisma ortaminda statik olarak kontrol edildi. Ortamda .NET 10 SDK ve
+PowerShell bulunmadigi icin gercek dotnet build/test burada calistirilamadi.
+Windows owner PC'de teslimden sonra ilk is RAVEN.bat uzerinden test/build kapilarini
+calistir.

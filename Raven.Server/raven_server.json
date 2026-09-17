@@ -1,0 +1,51 @@
+{
+  "Raven": {
+    "PublicBaseUrl": "https://api.ravenrusttr.com.tr",
+    "ListenUrl": "http://0.0.0.0:5088",
+    "Environment": "Production",
+    "AdminUser": "ravenadmin",
+    "DataDirectory": "Data",
+    "UpdateDirectory": "Updates",
+    "PrefabContentDirectory": "Content/Prefabs",
+    "LicensePrivateKeyPath": "Secrets/license_private.pem",
+    "UpdatePublicKeyPath": "Secrets/update_public.pem",
+    "GracePeriodHours": 24
+  },
+  "Shopier": {
+    "Enabled": false,
+    "ApiKey": "",
+    "BuyUrl": "https://www.shopier.com/ravenrust",
+    "ApiUrl": "https://api.shopier.com/v1/orders",
+    "CheckIntervalSeconds": 60,
+    "RequestTimeoutSeconds": 20,
+    "PageSize": 50,
+    "MaximumPagesPerCheck": 20,
+    "MaximumErrorBackoffSeconds": 600,
+    "Products": [
+      {
+        "Enabled": true,
+        "ProductId": "",
+        "Title": "Raven Map Panel Standard",
+        "ExpectedUnitPrice": "",
+        "ExpectedCurrency": "TRY",
+        "LicenseDays": 0,
+        "Plan": "STANDARD"
+      },
+      {
+        "Enabled": true,
+        "ProductId": "",
+        "Title": "Raven Map Panel Premium",
+        "ExpectedUnitPrice": "",
+        "ExpectedCurrency": "TRY",
+        "LicenseDays": 0,
+        "Plan": "PREMIUM"
+      }
+    ],
+    "ProcessExistingOrdersOnFirstRun": false
+  },
+  "Support": {
+    "Url": "",
+    "Label": "Discord Destek",
+    "Message": "Sorununuz devam ederse Raven destek ekibine ulaşabilirsiniz."
+  }
+}

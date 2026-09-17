@@ -1,0 +1,97 @@
+<Window x:Class="RavenMapPanel.UpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Raven Map Panel - Güncelleme"
+        Width="690" Height="500"
+        MinWidth="690" MinHeight="500"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBrush}"
+        Foreground="{StaticResource TextBrush}"
+        Icon="Assets/raven-brand-v3.ico"
+        Closing="Window_Closing">
+    <Grid Background="{StaticResource WindowBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Raven header -->
+        <Border Grid.Row="0" Background="#0B1118" BorderBrush="#202B36" BorderThickness="0,0,0,1" Padding="26,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="56"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Width="52" Height="52" Background="#E65022" CornerRadius="8">
+                    <Image Source="Assets/raven-brand-v3.png" Width="52" Height="52"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Raven Map Panel" FontSize="21" FontWeight="Bold" Foreground="#F3F6F8"/>
+                    <TextBlock Text="YENİ SÜRÜM HAZIR" Foreground="{StaticResource AccentSoftBrush}" FontSize="10" FontWeight="Bold" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Border Grid.Column="2" VerticalAlignment="Center" Background="#2A1B13" BorderBrush="#70402C"
+                        BorderThickness="1" CornerRadius="14" Padding="11,5">
+                    <TextBlock Text="ZORUNLU GÜNCELLEME" Foreground="#F5A067" FontSize="9" FontWeight="Bold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Margin="26,20,26,18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Background="#101720" BorderBrush="#293642" BorderThickness="1" CornerRadius="9" Padding="15,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="SÜRÜM YÜKSELTME" Foreground="#718190" FontSize="9" FontWeight="Bold"/>
+                        <TextBlock x:Name="VersionText" Foreground="#F0F3F6" FontSize="15" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="Güncelleme yapılmadan Raven kullanılamaz."
+                               Foreground="#8996A5" FontSize="10" VerticalAlignment="Center" Margin="18,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,14,0,0" Padding="17">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="DEĞİŞİKLİKLER" Style="{StaticResource SectionTitle}"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <TextBlock x:Name="NotesText" Foreground="#DDE5EB" TextWrapping="Wrap" FontSize="12" LineHeight="19"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="2" Margin="0,14,0,0">
+                <ProgressBar x:Name="DownloadProgress" Height="7" Minimum="0" Maximum="100" Visibility="Collapsed"/>
+                <TextBlock x:Name="StatusText" Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Blocking footer: no Later button -->
+        <Border Grid.Row="2" Background="#0B1118" BorderBrush="#202B36" BorderThickness="0,1,0,0" Padding="26,16">
+            <Grid>
+                <TextBlock Text="Raven Map Panel'i kullanmaya devam etmek için güncellemeyi yükleyin."
+                           Foreground="#7F8D9B" FontSize="10" VerticalAlignment="Center"/>
+                <Button x:Name="UpdateButton" Content="ŞİMDİ GÜNCELLE" Style="{StaticResource PrimaryButton}"
+                        Padding="24,10" MinWidth="155" HorizontalAlignment="Right" Click="Update_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

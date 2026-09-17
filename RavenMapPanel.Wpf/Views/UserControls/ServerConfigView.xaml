@@ -1,0 +1,76 @@
+<UserControl x:Class="RavenMapPanel.Views.UserControls.ServerConfigView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="900"
+             Background="#0B0D0C">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="18" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="SUNUCU AYARLARI" Style="{StaticResource HeaderTextStyle}" Foreground="#E7E8E5"/>
+                <TextBlock Text="Sunucu yapılandırmasını yönetin ve güncelleyin" Style="{StaticResource SubheaderTextStyle}" Foreground="#8F978F"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Configuration Form -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <TextBlock Text="Genel Ayarlar" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,15"/>
+                    
+                    <Label Content="Sunucu Adı" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="ServerNameTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <Label Content="Port" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="PortTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <CheckBox x:Name="EnableHttpsCheckBox" Content="HTTPS Etkinleştir" Style="{StaticResource CheckBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <Label Content="Sertifika Yolu" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="CertificatePathTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <Label Content="Sertifika Şifresi" Style="{StaticResource LabelStyle}"/>
+                    <PasswordBox x:Name="CertificatePasswordBox" Style="{StaticResource PasswordBoxStyle}" Margin="0,0,0,10"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Güvenlik Ayarları" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,15"/>
+                    
+                    <Label Content="Yönetici Kullanıcı Adı" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="AdminUsernameTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <Label Content="Yönetici Şifre" Style="{StaticResource LabelStyle}"/>
+                    <PasswordBox x:Name="AdminPasswordBox" Style="{StaticResource PasswordBoxStyle}" Margin="0,0,0,10"/>
+                    
+                    <Label Content="İzinli Ana Bilgisayarlar" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="AllowedHostsTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                    
+                    <CheckBox x:Name="EnableShopierPaymentsCheckBox" Content="Shopier Ödemeleri Etkinleştir" Style="{StaticResource CheckBoxStyle}" Margin="0,0,0,10"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <Border Grid.Row="2" Background="#111411" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15" Margin="0,15,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="SaveConfigButton" Content="Kaydet" Style="{StaticResource PrimaryButtonStyle}" Width="100" Margin="0,0,10,0"/>
+                <Button x:Name="ResetConfigButton" Content="Sıfırla" Style="{StaticResource SecondaryButtonStyle}" Width="100"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

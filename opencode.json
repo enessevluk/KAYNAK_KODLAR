@@ -1,0 +1,39 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "model": "ollama/qwen3-coder:30b",
+  "default_agent": "raven",
+
+  "agent": {
+    "raven": {
+      "description": "Tamamen yerel Türkçe yazılım geliştirme ajanı",
+      "mode": "primary",
+      "temperature": 0.1,
+      "steps": 40,
+
+      "prompt": "Sen Windows bilgisayarda tamamen yerel çalışan bir yazılım geliştirme ajanısın. Kullanıcıyla HER ZAMAN TÜRKÇE konuş. Açıklamalar, analizler, sorular ve sonuçlar Türkçe olmalıdır. Çalışma dizinindeki yerel dosyaları incelemek için SADECE list, glob, grep ve read araçlarını kullan. Yerel dosyaları okumak için webfetch, websearch, URL veya file:/// ASLA kullanma. 'explore' isimli bir araç çağırma. Subagent kullanma. Mevcut olmayan araç isimleri uydurma. Komut çalıştırmak gerektiğinde bash kullan. Dosya değiştirmek gerektiğinde edit veya write kullan. Kullanıcının açık talebi olmadan dosya veya klasör silme. Önce mevcut yapıyı analiz et, sonra işlem yap. Bir araç hata verirse aynı yanlış aracı tekrar çağırma.",
+
+      "permission": {
+        "read": "allow",
+        "list": "allow",
+        "glob": "allow",
+        "grep": "allow",
+
+        "bash": "ask",
+        "edit": "ask",
+
+        "question": "allow",
+        "todowrite": "allow",
+
+        "webfetch": "deny",
+        "websearch": "deny",
+        "task": "deny",
+        "external_directory": "deny"
+      }
+    },
+
+    "explore": {
+      "disable": true
+    }
+  }
+}

@@ -1,0 +1,45 @@
+RAVEN v1.7.1 - OWNER KEY / ROTATION REHBERI
+=============================================
+
+NORMAL KULLANIM
+---------------
+Gunluk Server Update ZIP'i artik update_private.pem ile RSA imzalanir.
+
+Tercih edilen yeni konum:
+  OWNER_SECRETS\license_private.pem
+  OWNER_SECRETS\update_private.pem
+
+Eski konumlar otomatik taninir:
+  OWNER_SECRETS\CURRENT_NEW\license_private.pem
+  OWNER_SECRETS\CURRENT_NEW\update_private.pem
+  OWNER_SECRETS\CURRENT\...
+
+license_private.pem:
+  Yalniz ilk VDS FULL OWNER paketine eklenir. VDS'de SERVER\Secrets icinde
+  kalir; normal update bunu tasimaz veya ezmez.
+
+update_private.pem:
+  Imzali client otomatik update paketinde ve imzali SERVER UPDATE ZIP'inde kullanilir.
+  Private key VDS'ye veya update paketine konmaz; VDS yalniz update_public.pem ile dogrular.
+
+RAVEN.bat > O ile anahtarlarin bulunup bulunmadigini kontrol edebilirsin.
+Anahtarin kendisi ekrana yazilmaz.
+
+KEY ROTATION / ESKI CLIENT GECISI
+---------------------------------
+Yalniz eski Raven client'ini daha once musteriye dagittiysan gerekir.
+Hic eski client dagitilmadiysa key rotation yapma.
+
+Eski gecis anahtari:
+  OWNER_SECRETS\MIGRATION_OLD\update_private.pem
+
+GECIS:
+1. Eski update serveri / eski client guven zinciri calisirken:
+     RAVEN.bat > K. ESKI CLIENT KEY GECISI
+2. DIST\Update\TRANSITION_v1.7.1 paketini eski serverdan yayinla.
+3. Kullanicilar gecis client'ina geldikten sonra yeni public key zincirine gec.
+4. Bundan sonraki normal client update'lerinde:
+     RAVEN.bat > 5. UPDATE PAKETI
+
+Private keyi kaybettiysen kendi kendine yeni key uretme. Eski clientlarin
+imza guven zincirini bozabilirsin. Once yedekten geri yukle.

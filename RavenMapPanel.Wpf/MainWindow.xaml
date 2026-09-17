@@ -1,0 +1,819 @@
+<Window x:Class="RavenMapPanel.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:RavenMapPanel"
+        Title="Raven Map Studio" Icon="Assets/raven-brand-v3.ico" WindowStartupLocation="CenterScreen" WindowState="Maximized" MinWidth="1180" MinHeight="760">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <Geometry x:Key="IconHome">M3,11 L12,3 L21,11 M5.5,9.5 V21 H18.5 V9.5 M9.5,21 V14 H14.5 V21</Geometry>
+        <Geometry x:Key="IconMap">M3,5 L9,3 L15,5 L21,3 V19 L15,21 L9,19 L3,21 Z M9,3 V19 M15,5 V21</Geometry>
+        <Geometry x:Key="IconMonument">M4,20 H20 M6,20 V9 H18 V20 M4,9 H20 L17,4 H7 Z M9,12 V17 M12,12 V17 M15,12 V17</Geometry>
+        <Geometry x:Key="IconLayers">M12,3 L21,8 L12,13 L3,8 Z M4,12 L12,17 L20,12 M4,16 L12,21 L20,16</Geometry>
+        <Geometry x:Key="IconWorld">M12,3 A9,9 0 1 0 12,21 A9,9 0 1 0 12,3 M3,12 H21 M12,3 C16,7 16,17 12,21 M12,3 C8,7 8,17 12,21</Geometry>
+        <Geometry x:Key="IconHistory">M4,5 V10 H9 M5,9 A8,8 0 1 1 5.5,17 M12,7 V12 L16,14</Geometry>
+        <Geometry x:Key="IconCheck">M4,13 L9,18 L20,6 M4,4 H20 V20 H4 Z</Geometry>
+        <Geometry x:Key="IconLogs">M5,6 H19 M5,12 H19 M5,18 H15 M2.5,6 H2.6 M2.5,12 H2.6 M2.5,18 H2.6</Geometry>
+        <Geometry x:Key="IconSettings">M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M12,3 V5 M12,19 V21 M3,12 H5 M19,12 H21 M5.6,5.6 L7,7 M17,17 L18.4,18.4 M18.4,5.6 L17,7 M7,17 L5.6,18.4</Geometry>
+        <Style x:Key="NavPath" TargetType="Path">
+            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+            <Setter Property="StrokeThickness" Value="1.7"/><Setter Property="StrokeStartLineCap" Value="Round"/><Setter Property="StrokeEndLineCap" Value="Round"/><Setter Property="StrokeLineJoin" Value="Round"/>
+            <Setter Property="Width" Value="19"/><Setter Property="Height" Value="19"/><Setter Property="Stretch" Value="Uniform"/>
+        </Style>
+        <Style x:Key="NavIconBox" TargetType="Border">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="9"/>
+            <Setter Property="Background" Value="#141E28"/>
+            <Setter Property="BorderBrush" Value="#2A3947"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="RuleChoiceButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="MinHeight" Value="34"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Background" Value="#141E28"/>
+            <Setter Property="BorderBrush" Value="#334250"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="RuleRequiredButton" TargetType="Button" BasedOn="{StaticResource RuleChoiceButton}">
+            <Setter Property="Foreground" Value="#58D89A"/>
+            <Style.Triggers><DataTrigger Binding="{Binding IsRequired}" Value="True"><Setter Property="Background" Value="#173B2D"/><Setter Property="BorderBrush" Value="#37A36F"/><Setter Property="Foreground" Value="#8BF0BD"/></DataTrigger></Style.Triggers>
+        </Style>
+        <Style x:Key="RuleOptionalButton" TargetType="Button" BasedOn="{StaticResource RuleChoiceButton}">
+            <Setter Property="Foreground" Value="#EAC95C"/>
+            <Style.Triggers><DataTrigger Binding="{Binding IsOptional}" Value="True"><Setter Property="Background" Value="#403719"/><Setter Property="BorderBrush" Value="#B49532"/><Setter Property="Foreground" Value="#FFE17A"/></DataTrigger></Style.Triggers>
+        </Style>
+        <Style x:Key="RuleBlockedButton" TargetType="Button" BasedOn="{StaticResource RuleChoiceButton}">
+            <Setter Property="Foreground" Value="#EE747C"/>
+            <Style.Triggers><DataTrigger Binding="{Binding IsBlocked}" Value="True"><Setter Property="Background" Value="#401F25"/><Setter Property="BorderBrush" Value="#B84B54"/><Setter Property="Foreground" Value="#FF9CA2"/></DataTrigger></Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="MonumentRowTemplate" DataType="{x:Type local:MonumentRuleViewModel}">
+            <Border Width="420" MinHeight="96" Background="#101821" BorderBrush="#293744" BorderThickness="1" CornerRadius="12" Padding="12" Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="62"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Border Width="56" Height="56" CornerRadius="28" Background="#17232D" BorderBrush="#3A4C5A" BorderThickness="2" VerticalAlignment="Top"><Image Source="{Binding IconPath}" Width="46" Height="46" Stretch="Uniform"/></Border>
+                    <StackPanel Grid.Column="1" Margin="10,3,8,0">
+                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Category}" Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                        <ComboBox Width="168" Height="34" MinHeight="34" Margin="0,8,0,0" HorizontalAlignment="Left"
+                                  ItemsSource="{Binding PrefabOptions}" DisplayMemberPath="Name"
+                                  SelectedValuePath="Id" SelectedValue="{Binding SelectedPrefabVariantId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Visibility="{Binding CustomPrefabAvailable, Converter={StaticResource BoolToVisibility}}"
+                                  ToolTip="Monument görünümünü seç"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource RuleRequiredButton}" Content="✓" Tag="{Binding}" CommandParameter="Required" Click="SetRuleState_Click" ToolTip="Bu monument kesin olsun"/>
+                            <Button Style="{StaticResource RuleOptionalButton}" Content="?" Tag="{Binding}" CommandParameter="Optional" Click="SetRuleState_Click" ToolTip="İsteğe bağlı"/>
+                            <Button Style="{StaticResource RuleBlockedButton}" Content="×" Tag="{Binding}" CommandParameter="Blocked" Click="SetRuleState_Click" ToolTip="Bu monument olmasın"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0" Visibility="{Binding IsGodRock, Converter={StaticResource BoolToVisibility}}" ToolTip="Large God Rock hedef adedi">
+                            <Button Content="−" Width="28" Height="28" MinHeight="28" Padding="0" Tag="{Binding}" Click="GodRockMinus_Click"/>
+                            <Border Background="#171F29" BorderBrush="#3B4856" BorderThickness="1" CornerRadius="6" Margin="5,0" MinWidth="34" Height="28"><TextBlock Text="{Binding TargetCount}" Foreground="{StaticResource AccentSoftBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                            <Button Content="+" Width="28" Height="28" MinHeight="28" Padding="0" Tag="{Binding}" Click="GodRockPlus_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+        <Style x:Key="SectionTitle" TargetType="TextBlock"><Setter Property="Foreground" Value="#9DA9B6"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="10"/><Setter Property="Margin" Value="0,0,0,11"/></Style>
+        <Style x:Key="PageTitle" TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextBrush}"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="26"/></Style>
+        <Style x:Key="Metric" TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextBrush}"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="23"/></Style>
+        <Style x:Key="StudioStepButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+            <Setter Property="Background" Value="#111A23"/>
+            <Setter Property="BorderBrush" Value="#293744"/>
+            <Setter Property="Foreground" Value="#8C9BAD"/>
+            <Setter Property="MinHeight" Value="48"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="6,0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="StudioStepButtonActive" TargetType="Button" BasedOn="{StaticResource StudioStepButton}">
+            <Setter Property="Background" Value="#1D1C1D"/>
+            <Setter Property="BorderBrush" Value="#C6532E"/>
+            <Setter Property="Foreground" Value="#FFF2EB"/>
+        </Style>
+        <Style x:Key="HeroArrowButton" TargetType="Button">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Foreground" Value="#B9C7D2"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#FFFFFF"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True"><Setter Property="Opacity" Value="0.55"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource WindowBrush}">
+        <Grid.RowDefinitions><RowDefinition Height="66"/><RowDefinition Height="*"/><RowDefinition Height="34"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="#101720" BorderBrush="#26313D" BorderThickness="0,0,0,1">
+            <Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="214"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Border Width="42" Height="42" CornerRadius="0" Background="#0D100E" BorderBrush="#3A403B" BorderThickness="1"><Image Source="Assets/raven-brand-v3.png" Width="40" Height="40" Stretch="Uniform"/></Border><StackPanel Margin="11,0,0,0" VerticalAlignment="Center"><TextBlock Text="Raven Map Studio" Foreground="#F5F8FB" FontWeight="SemiBold" FontSize="16"/><TextBlock x:Name="VersionTextBlock" Text="V1.0.12" Foreground="#8492A4" FontWeight="SemiBold" FontSize="9" Margin="0,2,0,0"/></StackPanel></StackPanel>
+                <Border Grid.Column="1" Background="#151E29" BorderBrush="#2A3543" BorderThickness="1" CornerRadius="9" Padding="13,8" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconMap}" Style="{StaticResource NavPath}" Stroke="#8695A7" Width="16" Height="16"/><TextBlock x:Name="ProjectTitle" Text="Yeni harita" Foreground="#EAF2F8" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0"/><TextBlock x:Name="ProjectMetaText" Text="  · 4500 · Procedural" Foreground="#748398" FontSize="10" VerticalAlignment="Center"/></StackPanel></Border>
+                <Border Grid.Column="2" Background="#12352C" BorderBrush="#235141" BorderThickness="1" CornerRadius="9" Padding="13,8" VerticalAlignment="Center"><StackPanel Orientation="Horizontal"><Ellipse Width="7" Height="7" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0"/><TextBlock x:Name="TopStatus" Text="Hazır" Foreground="#9FE6C8" FontWeight="SemiBold" FontSize="11"/></StackPanel></Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="214"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="#0D141C" BorderBrush="#222C38" BorderThickness="0,0,1,0" Padding="12,18">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"><StackPanel>
+                        <TextBlock Text="STUDIO" Style="{StaticResource SectionTitle}" Margin="10,3,0,7"/>
+                        <Button x:Name="NavDashboard" Style="{StaticResource NavButton}" Tag="Dashboard" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconHome}" Width="17" Height="17"/></Border><TextBlock Text="Başlangıç" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavStudio" Style="{StaticResource NavButton}" Tag="Studio" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconMap}" Width="17" Height="17"/></Border><TextBlock Text="Harita Studio" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <TextBlock Text="DÜNYA" Style="{StaticResource SectionTitle}" Margin="10,18,0,7"/>
+                        <Button x:Name="NavMonuments" Style="{StaticResource NavButton}" Tag="Monuments" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconMonument}" Width="17" Height="17"/></Border><TextBlock Text="Monument Kuralları" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavIcons" Style="{StaticResource NavButton}" Tag="Icons" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconLayers}" Width="17" Height="17"/></Border><TextBlock Text="İkonlar ve Katmanlar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavAdvanced" Style="{StaticResource NavButton}" Tag="Advanced" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconWorld}" Width="17" Height="17"/></Border><TextBlock Text="Biyom &amp; Dünya" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <TextBlock Text="KÜTÜPHANE" Style="{StaticResource SectionTitle}" Margin="10,18,0,7"/>
+                        <Button x:Name="NavHistory" Style="{StaticResource NavButton}" Tag="History" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconHistory}" Width="17" Height="17"/></Border><TextBlock Text="Üretimler" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavValidation" Style="{StaticResource NavButton}" Tag="Validation" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconCheck}" Width="17" Height="17"/></Border><TextBlock Text="Doğrulama" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavLogs" Style="{StaticResource NavButton}" Tag="Logs" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconLogs}" Width="17" Height="17"/></Border><TextBlock Text="Aktivite" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="NavSettings" Style="{StaticResource NavButton}" Tag="Settings" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Style="{StaticResource NavIconBox}"><Path Style="{StaticResource NavPath}" Data="{StaticResource IconSettings}" Width="17" Height="17"/></Border><TextBlock Text="Ayarlar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Margin="10,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                    </StackPanel></ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1" Margin="24">
+                <!-- Dashboard -->
+                <Grid x:Name="DashboardPage">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Border x:Name="DashboardCriticalBar" Visibility="Collapsed" Background="#3A191A" BorderBrush="#A94B4F" BorderThickness="1" CornerRadius="10" Padding="13,9" Margin="0,0,0,10"><DockPanel><TextBlock Text="!" Foreground="#FF8B8F" FontWeight="Bold" FontSize="18" Margin="0,0,10,0"/><TextBlock x:Name="DashboardCriticalText" Foreground="#FFD5D7" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></Border>
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="14"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+
+                        <Border CornerRadius="15" ClipToBounds="True" BorderBrush="#314251" BorderThickness="1" MinHeight="360">
+                            <Grid>
+                                <local:RemoteImage x:Name="DashboardHeroImage" Source="Assets/backgrounds/arkaplan-5.jpg" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Rectangle><Rectangle.Fill><LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5"><GradientStop Color="#B8080D13" Offset="0"/><GradientStop Color="#1A080D13" Offset="0.58"/><GradientStop Color="#50080D13" Offset="1"/></LinearGradientBrush></Rectangle.Fill></Rectangle>
+                                <Rectangle><Rectangle.Fill><LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1"><GradientStop Color="#00000000" Offset="0.45"/><GradientStop Color="#C8080D13" Offset="1"/></LinearGradientBrush></Rectangle.Fill></Rectangle>
+                                <StackPanel VerticalAlignment="Bottom" Margin="30,28" MaxWidth="650" HorizontalAlignment="Left">
+                                    <TextBlock Text="RAVEN MAP STÜDYO" Foreground="#F08B68" FontWeight="Bold" FontSize="10"/>
+                                    <TextBlock Text="Haritanı Tasarla, Doğrula ve Üret" Foreground="#FFFFFF" FontWeight="Bold" FontSize="29" Margin="0,7,0,0"/>
+                                    <TextBlock Text="Dünya yapısını, monumentleri ve özel görünümleri tek ayar dosyasında yönetin." Foreground="#D5DEE5" FontSize="12" Margin="0,7,0,0"/>
+                                    <Button Style="{StaticResource PrimaryButton}" Content="Harita Oluşturmaya Başla  →" Padding="16,9" HorizontalAlignment="Left" Margin="0,15,0,0" Click="GoStudio_Click"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0">
+                                    <Button Style="{StaticResource HeroArrowButton}" Content="‹" Click="PreviousHero_Click" ToolTip="Önceki fotoğraf"/>
+                                    <Button Style="{StaticResource HeroArrowButton}" Content="›" Click="NextHero_Click" ToolTip="Sonraki fotoğraf"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Row="2" Background="#111A23" BorderBrush="#2C3B48" BorderThickness="1" CornerRadius="14" ClipToBounds="True">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="4"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <Border x:Name="DashboardAnnouncementAccent" Background="#D9572B"/>
+                                <Grid Grid.Row="1" Margin="20,16,20,18">
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <DockPanel LastChildFill="True">
+                                        <Border x:Name="DashboardAnnouncementBadge" DockPanel.Dock="Left" Background="#253342" BorderBrush="#405363" BorderThickness="1" CornerRadius="8" Padding="9,5" Margin="0,0,12,0"><TextBlock x:Name="DashboardAnnouncementLevelText" Text="BİLGİ" Foreground="#AFC2D1" FontSize="9" FontWeight="Bold"/></Border>
+                                        <TextBlock x:Name="DashboardAnnouncementPeriod" Foreground="#8198A9" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                    </DockPanel>
+                                    <TextBlock x:Name="DashboardAnnouncementTitle" Grid.Row="1" Text="Raven Map Studio'ya Hoş Geldiniz" Foreground="#F5F8FB" FontSize="22" LineHeight="27" FontWeight="Bold" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                    <TextBlock x:Name="DashboardAnnouncementMessage" Grid.Row="2" Text="Duyurular, yenilikler ve bakım bildirimleri burada açık ve düzenli biçimde gösterilir." Foreground="#B9C7D2" FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,7,0,0" MaxHeight="92"/>
+                                    <ScrollViewer x:Name="DashboardAnnouncementImagesScroller" Grid.Row="3" Visibility="Collapsed" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,14,0,0">
+                                        <StackPanel x:Name="DashboardAnnouncementImagesPanel" Orientation="Horizontal"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- Studio -->
+                <Grid x:Name="StudioPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition x:Name="StudioHeaderRow" Height="76"/><RowDefinition Height="62"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid x:Name="StudioHeader" Margin="2,0,2,10">
+                        <StackPanel VerticalAlignment="Center"><TextBlock Text="HARİTA STUDIO" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" FontSize="10"/><TextBlock Text="Yeni dünyanı oluştur" Style="{StaticResource PageTitle}" Margin="0,3,0,0"/><TextBlock Text="Dünya ayarlarını tamamla, monumentleri seç ve tek ekrandan üret." Foreground="{StaticResource MutedBrush}" Margin="0,4,0,0"/></StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"><StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0"><Ellipse Width="7" Height="7" Fill="#55C994" Margin="0,0,7,0"/><TextBlock Text="Ayarlar otomatik saklanır" Foreground="#8BB5A6" VerticalAlignment="Center" FontSize="10"/></StackPanel><Button Style="{StaticResource PrimaryButton}" Content="MAP içe aktar" Padding="15,8" Click="ImportMap_Click" ToolTip="Dışarıdan alınan Rust .map dosyasını otomatik algıla ve aç"/></StackPanel>
+                    </Grid>
+                    <Border Grid.Row="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,12">
+                        <UniformGrid Columns="4">
+                            <Button Style="{StaticResource StudioStepButtonActive}" IsHitTestVisible="False"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#D9572B"><TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border><TextBlock Text="Dünya" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Monuments" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Monumentler" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Icons" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Görünüm" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Validation" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="4" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Kontrol &amp; Üret" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        </UniformGrid>
+                    </Border>
+                    <Grid x:Name="StudioMainGrid" Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="StudioSettingsColumn" Width="380"/></Grid.ColumnDefinitions>
+                        <Grid x:Name="StudioMapArea" Margin="0,0,12,0"><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition x:Name="StudioLogRow" Height="150"/></Grid.RowDefinitions>
+                            <Border Background="#061019" BorderBrush="#2A3743" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
+                                <Grid><local:MapViewport x:Name="MapView" Margin="1"/>
+                                    <local:TerrainDraftCanvas x:Name="TerrainDraftView" Margin="1" Visibility="Collapsed"/>
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Background="#E00D131B" BorderBrush="#34414F" BorderThickness="1" CornerRadius="8" Padding="6" Margin="12"><StackPanel Orientation="Horizontal"><Button Style="{StaticResource ButtonBase}" Content="＋" Width="38" Height="36" Padding="0" Click="ZoomIn_Click" ToolTip="Yakınlaştır"/><Button Style="{StaticResource ButtonBase}" Content="−" Width="38" Height="36" Padding="0" Margin="5,0,0,0" Click="ZoomOut_Click" ToolTip="Uzaklaştır"/><Button Style="{StaticResource ButtonBase}" Content="↙" Width="38" Height="36" Padding="0" Margin="5,0,0,0" Click="FitMap_Click" ToolTip="Haritanın tamamını sığdır"/><Button x:Name="TerrainDraftToggleButton" Style="{StaticResource ButtonBase}" Content="✎ Taslak" Height="36" Padding="10,0" Margin="5,0,0,0" Click="ToggleTerrainDraft_Click" ToolTip="2D arazi taslağını aç/kapat"/><Button x:Name="ExpandPreviewButton" Style="{StaticResource ButtonBase}" Content="⛶" Width="38" Height="36" Padding="0" Margin="5,0,0,0" Click="TogglePreviewSize_Click" ToolTip="Büyük önizleme"/></StackPanel></Border>
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#E00D131B" BorderBrush="#34414F" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="12"><StackPanel Orientation="Horizontal"><TextBlock x:Name="MapCanvasStatus" Text="Önizleme bekleniyor" Foreground="#C7D0DA" Margin="0,0,12,0"/><TextBlock x:Name="ZoomLabel" Text="100%" Foreground="{StaticResource AccentSoftBrush}" FontWeight="SemiBold"/></StackPanel></Border>
+                                    <Grid x:Name="MarkerDetailsCard" Visibility="Collapsed" Background="#C4070B10" Margin="1">
+                                        <Border Background="#FA05080C" BorderBrush="#536675" BorderThickness="1" CornerRadius="14" Margin="64" ClipToBounds="True">
+                                            <Grid>
+                                                <Image x:Name="MarkerGalleryImage" Stretch="Uniform" Margin="16" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                <Button Style="{StaticResource ButtonBase}" Content="×" Width="38" Height="38" Padding="0" FontSize="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="14" Click="CloseMarkerDetails_Click" ToolTip="Görseli kapat"/>
+                                                <Button x:Name="MarkerGalleryPrevious" Style="{StaticResource ButtonBase}" Content="‹" Width="42" Height="62" Padding="0" FontSize="30" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0" Click="MarkerGalleryPrevious_Click"/>
+                                                <Button x:Name="MarkerGalleryNext" Style="{StaticResource ButtonBase}" Content="›" Width="42" Height="62" Padding="0" FontSize="30" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="16,0" Click="MarkerGalleryNext_Click"/>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <Border x:Name="StudioLogPanel" Grid.Row="1" Background="#0C141C" BorderBrush="#29404B" BorderThickness="1" CornerRadius="11" Margin="0,10,0,0" Padding="0">
+                                <Grid>
+                                    <ScrollViewer Margin="14,12,124,12" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <TextBlock x:Name="StudioLog" Text="Bu oturumda henüz işlem yok." TextWrapping="Wrap" Foreground="#B9D1C5" FontFamily="Cascadia Mono" FontSize="10.5" LineHeight="17" TextAlignment="Left" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                                    </ScrollViewer>
+                                    <Button Style="{StaticResource ButtonBase}" Content="Geçmişi temizle" Padding="10,5" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Click="ClearLog_Click"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <Grid x:Name="StudioSettingsPanel" Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="136"/><RowDefinition Height="104"/></Grid.RowDefinitions>
+                            <Border Style="{StaticResource Card}" Padding="17"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel><Grid Margin="0,0,0,15"><StackPanel><TextBlock Text="Dünya ayarları" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" FontSize="16"/><TextBlock Text="Haritanın temel kimliğini ve yapısını belirle." Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="0,4,0,0"/></StackPanel><Border Background="#2A1D19" BorderBrush="#5A3020" BorderThickness="1" CornerRadius="7" Padding="8,5" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Text="DENGELİ" Foreground="#F3B08F" FontSize="9" FontWeight="SemiBold"/></Border></Grid><Border Style="{StaticResource SubCard}" Padding="12"><StackPanel><TextBlock Text="Harita adı" Foreground="{StaticResource MutedBrush}"/><TextBox x:Name="MapNameBox" Margin="0,6,0,13"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="12"/><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition Width="70"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="İlk seed" Foreground="{StaticResource MutedBrush}"/><Grid Margin="0,5,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="42"/></Grid.ColumnDefinitions><TextBox x:Name="SeedBox"/><Button Grid.Column="1" Style="{StaticResource ButtonBase}" Content="↻" Padding="0" Margin="5,0,0,0" Click="RandomSeed_Click" ToolTip="Rastgele seed"/></Grid></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="Dünya boyutu" Foreground="{StaticResource MutedBrush}"/><TextBox x:Name="SizeBox" Margin="0,5,0,0"/></StackPanel><StackPanel Grid.Column="4"><TextBlock Text="Harita adedi" Foreground="{StaticResource MutedBrush}"/><ComboBox x:Name="GenerationCountBox" Margin="0,5,0,0" SelectedIndex="0"><ComboBoxItem Content="1"/><ComboBoxItem Content="2"/><ComboBoxItem Content="3"/><ComboBoxItem Content="4"/><ComboBoxItem Content="5"/><ComboBoxItem Content="6"/><ComboBoxItem Content="7"/></ComboBox></StackPanel></Grid>
+                            </StackPanel></Border><Border Style="{StaticResource SubCard}" Margin="0,10,0,0" Padding="12"><StackPanel><Grid><StackPanel><TextBlock Text="DÜNYA YAPISI" Style="{StaticResource SectionTitle}"/><TextBlock Text="Haritada üretilecek doğal bağlantılar" Foreground="{StaticResource MutedBrush}" FontSize="9" Margin="0,2,0,0"/></StackPanel><Button Style="{StaticResource ButtonBase}" Content="Biyom, Tier ve Prefablar  →" Padding="10,5" HorizontalAlignment="Right" Click="GoAdvanced_Click"/></Grid><UniformGrid Columns="2" Rows="4" Margin="0,8,0,0"><CheckBox x:Name="RoadsCheck" Content="Yollar"/><CheckBox x:Name="RiversCheck" Content="Nehirler"/><CheckBox x:Name="PowerCheck" Content="Elektrik hatları"/><CheckBox x:Name="RailsCheck" Content="Raylar"/><CheckBox x:Name="MetroCheck" Content="Yer altı rayları"/><CheckBox x:Name="OasisCheck" Content="Vahalar" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/><CheckBox x:Name="CanyonCheck" Content="Kanyonlar" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/><CheckBox x:Name="LakesCheck" Content="Göller" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/></UniformGrid></StackPanel></Border>
+                                <Border Style="{StaticResource SubCard}" Margin="0,10,0,0" Padding="12">
+                                    <StackPanel>
+                                        <Grid>
+                                            <StackPanel><TextBlock Text="ARAZİ TASLAĞI · BETA" Style="{StaticResource SectionTitle}"/><TextBlock Text="Paint gibi çiz; proje dosyasında saklanır." Foreground="{StaticResource MutedBrush}" FontSize="9" Margin="0,2,0,0"/></StackPanel>
+                                            <CheckBox x:Name="TerrainDraftEnabledCheck" Content="Etkin" HorizontalAlignment="Right" Checked="TerrainDraftSetting_Changed" Unchecked="TerrainDraftSetting_Changed"/>
+                                        </Grid>
+                                        <Grid Margin="0,9,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition Width="92"/></Grid.ColumnDefinitions>
+                                            <ComboBox x:Name="TerrainBrushBox" SelectionChanged="TerrainBrush_Changed"><ComboBoxItem Content="Deniz" Tag="Sea"/><ComboBoxItem Content="Yeşillik" Tag="Temperate"/><ComboBoxItem Content="Toprak" Tag="Dirt"/><ComboBoxItem Content="Kar" Tag="Arctic"/><ComboBoxItem Content="Dağ" Tag="Mountain"/><ComboBoxItem Content="Göl" Tag="Lake"/></ComboBox>
+                                            <StackPanel Grid.Column="2"><TextBlock x:Name="TerrainBrushSizeText" Text="%8" Foreground="{StaticResource AccentSoftBrush}" HorizontalAlignment="Right"/><Slider x:Name="TerrainBrushSizeSlider" Minimum="0.02" Maximum="0.22" Value="0.08" TickFrequency="0.01" ValueChanged="TerrainBrushSize_Changed"/></StackPanel>
+                                        </Grid>
+                                        <UniformGrid Columns="3" Margin="0,8,0,0"><Button Style="{StaticResource ButtonBase}" Content="Geri al" Click="TerrainUndo_Click" Margin="0,0,3,0"/><Button Style="{StaticResource ButtonBase}" Content="Yinele" Click="TerrainRedo_Click" Margin="3,0"/><Button Style="{StaticResource ButtonBase}" Content="Temizle" Click="TerrainClear_Click" Margin="3,0,0,0"/></UniformGrid>
+                                        <TextBlock x:Name="TerrainDraftCountText" Text="Kapalı · 0 fırça noktası" Foreground="#8FA1B2" FontSize="9" Margin="0,7,0,0"/>
+                                        <CheckBox x:Name="StrictMonumentRulesCheck" Content="Katı monument doğrulaması" Margin="0,9,0,0" Checked="TerrainDraftSetting_Changed" Unchecked="TerrainDraftSetting_Changed" ToolTip="Zorunlu/yasaklı kuralları geçmeyen haritayı teslim etme"/>
+                                        <TextBlock Text="Not: Taslak bu sürümde proje ve üretim talimatı olarak kaydedilir; Rust arazi katmanına uygulanması sonraki motor aşamasıdır." Foreground="#C3A56F" FontSize="9" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Button x:Name="GenerateButton" Style="{StaticResource PrimaryButton}" Content="Haritayı üret  →" FontWeight="SemiBold" FontSize="13" Padding="14,12" Click="Generate_Click" Margin="0,14,0,0"/>
+                                <Grid Margin="2,13,2,2"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid><TextBlock x:Name="SideProgressTitle" Text="Hazır" Foreground="#EDF3F7" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/><Button x:Name="CancelButton" Style="{StaticResource ButtonBase}" Content="İptal" Padding="8,3" HorizontalAlignment="Right" IsEnabled="False" Click="Cancel_Click"/></Grid><ProgressBar x:Name="GenerationProgress" Grid.Row="1" Height="6" Margin="0,10,0,7"/><TextBlock x:Name="SideProgressDetail" Grid.Row="2" Text="Üretim başlatılmadı." Foreground="#8FA1B2" FontSize="10" TextWrapping="Wrap"/></Grid>
+                            </StackPanel></ScrollViewer></Border>
+                            <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,10,0,0" Padding="13">
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid><TextBlock Text="Monument özeti" Foreground="#EDF3F7" FontWeight="SemiBold" FontSize="13"/><Button Style="{StaticResource ButtonBase}" Content="Kuralları düzenle  →" Padding="10,5" HorizontalAlignment="Right" Click="GoMonuments_Click"/></Grid>
+                                    <UniformGrid Grid.Row="1" Columns="3" Margin="0,10,0,7">
+                                        <Border Background="#11271F" BorderBrush="#28533F" BorderThickness="1" CornerRadius="8" Margin="0,0,4,0" Padding="8,6"><StackPanel><TextBlock Text="OLACAK" Foreground="#6FAF91" FontSize="8"/><TextBlock x:Name="StudioRequiredCount" Text="0 olsun" Foreground="#79E2AF" FontWeight="SemiBold" Margin="0,3,0,0"/></StackPanel></Border>
+                                        <Border Background="#2A171B" BorderBrush="#593139" BorderThickness="1" CornerRadius="8" Margin="4,0" Padding="8,6"><StackPanel><TextBlock Text="OLMAYACAK" Foreground="#B8767C" FontSize="8"/><TextBlock x:Name="StudioBlockedCount" Text="0 olmasın" Foreground="#FF9298" FontWeight="SemiBold" Margin="0,3,0,0"/></StackPanel></Border>
+                                        <Border Background="#10242D" BorderBrush="#285064" BorderThickness="1" CornerRadius="8" Margin="4,0,0,0" Padding="8,6"><StackPanel><TextBlock Text="ÖZEL" Foreground="#72A9BF" FontSize="8"/><TextBlock x:Name="StudioCustomPrefabCount" Text="0 özel görünüm" Foreground="#87D4EE" FontWeight="SemiBold" Margin="0,3,0,0"/></StackPanel></Border>
+                                    </UniformGrid>
+                                    <TextBlock Grid.Row="2" Text="Seçimler config dosyasına otomatik kaydedilir." Foreground="#7F90A0" FontSize="9"/>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,10,0,0" Padding="12"><StackPanel><TextBlock Text="DIŞA AKTAR" Style="{StaticResource SectionTitle}"/><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Button x:Name="ExportPngButton" Style="{StaticResource ButtonBase}" Content="PNG Kaydet" IsEnabled="False" Click="ExportPng_Click" Margin="0,0,4,0"/><Button x:Name="ExportMapButton" Grid.Column="1" Style="{StaticResource ButtonBase}" Content="MAP Kaydet" IsEnabled="False" Click="ExportMap_Click" Margin="4,0,0,0"/></Grid></StackPanel></Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                <!-- Advanced generation -->
+                <Grid x:Name="AdvancedPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid Margin="2,0,2,12">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Dünya ve Biyomlar" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="İklim dağılımını, ilerleme bölgelerini ve özel görünümleri yönet." Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.18*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="0.92*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="1.05*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- BIOME -->
+                            <Border Grid.Column="0" Style="{StaticResource Card}" VerticalAlignment="Top">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="BİYOM DAĞILIMI" Style="{StaticResource SectionTitle}" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Haritanın iklim bölgelerinin göreli payını belirler." Foreground="#C5CED7" FontSize="13" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                        <Button Style="{StaticResource ButtonBase}" Content="Varsayılan" Padding="11,6" HorizontalAlignment="Right" VerticalAlignment="Top" Click="ResetBiome_Click"/>
+                                    </Grid>
+
+                                    <Border Background="#111A23" BorderBrush="#2A3947" BorderThickness="1" CornerRadius="8" Padding="11" Margin="0,0,0,12">
+                                        <TextBlock Text="Çöl, Ilıman, Tundra ve Kar değerleri kendi aralarında 100'e oranlanır. Jungle oranı bu dört biyomdan ayrı uygulanır." Foreground="#9FB0BF" FontSize="11" TextWrapping="Wrap"/>
+                                    </Border>
+
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="145"/><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center"><TextBlock Text="Çöl" Foreground="#E6EDF3" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Arid · kurak alan" Foreground="#94A5B5" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                            <Slider x:Name="BiomeAridSlider" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="1" Height="22" Margin="12,0" ValueChanged="AdvancedValue_Changed" ToolTip="Çöl / Arid biyomunun ana biyomlar içindeki göreli ağırlığı"/>
+                                            <TextBlock x:Name="BiomeAridValue" Grid.Column="2" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="145"/><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center"><TextBlock Text="Ilıman" Foreground="#E6EDF3" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Temperate · yeşil alan" Foreground="#94A5B5" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                            <Slider x:Name="BiomeTemperateSlider" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="1" Height="22" Margin="12,0" ValueChanged="AdvancedValue_Changed" ToolTip="Ilıman / Temperate biyomunun ana biyomlar içindeki göreli ağırlığı"/>
+                                            <TextBlock x:Name="BiomeTemperateValue" Grid.Column="2" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="145"/><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center"><TextBlock Text="Tundra" Foreground="#E6EDF3" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Soğuk geçiş alanı" Foreground="#94A5B5" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                            <Slider x:Name="BiomeTundraSlider" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="1" Height="22" Margin="12,0" ValueChanged="AdvancedValue_Changed" ToolTip="Tundra biyomunun ana biyomlar içindeki göreli ağırlığı"/>
+                                            <TextBlock x:Name="BiomeTundraValue" Grid.Column="2" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="145"/><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center"><TextBlock Text="Kar" Foreground="#E6EDF3" FontWeight="SemiBold" FontSize="13"/><TextBlock Text="Arctic · kar ve buz" Foreground="#94A5B5" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                            <Slider x:Name="BiomeArcticSlider" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="1" Height="22" Margin="12,0" ValueChanged="AdvancedValue_Changed" ToolTip="Arctic / Kar biyomunun ana biyomlar içindeki göreli ağırlığı"/>
+                                            <TextBlock x:Name="BiomeArcticValue" Grid.Column="2" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <Border Background="#161B17" BorderBrush="#4B402C" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,2,0,0">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="145"/><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center"><TextBlock Text="Jungle" FontWeight="SemiBold" FontSize="13" Foreground="#F0D3A2"/><TextBlock Text="Ana 4 biyomdan bağımsız" Foreground="#B8A98F" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                            <Slider x:Name="BiomeJungleSlider" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="1" Height="22" Margin="12,0" ValueChanged="AdvancedValue_Changed" ToolTip="Jungle oranı ana dört biyomdan ayrı uygulanır"/>
+                                            <TextBlock x:Name="BiomeJungleValue" Grid.Column="2" HorizontalAlignment="Right" Foreground="#F0B567" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Background="#0E1B20" BorderBrush="#2B4650" BorderThickness="1" CornerRadius="8" Padding="11" Margin="0,12,0,0">
+                                        <StackPanel><TextBlock Text="UYGULANACAK DAĞILIM" Foreground="#7FA6B4" FontSize="9" FontWeight="Bold" Margin="0,0,0,5"/><TextBlock x:Name="BiomeSummaryText" Foreground="#D8E2E9" FontSize="11" TextWrapping="Wrap"/></StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                            <!-- TIER -->
+                            <Border Grid.Column="2" Style="{StaticResource Card}" VerticalAlignment="Top">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="İLERLEME BÖLGELERİ (TIER)" Style="{StaticResource SectionTitle}" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Haritanın ne kadarının başlangıç, orta ve ileri seviye bölge olacağını belirler." Foreground="#D6E0E8" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                        <Button Style="{StaticResource ButtonBase}" Content="Varsayılan" Padding="11,6" HorizontalAlignment="Right" VerticalAlignment="Top" Click="ResetTier_Click"/>
+                                    </Grid>
+
+                                    <Border Background="#111A23" BorderBrush="#2A3947" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="NE DEĞİŞTİRİR?" Foreground="#8FA5B7" FontSize="9" FontWeight="Bold" Margin="0,0,0,5"/>
+                                            <TextBlock Text="Tier doğrudan monument adedi vermez. Haritada üç zorluk bölgesine ne kadar yer ayrılacağını belirler. Rust bazı monumentleri yalnız uygun Tier alanına yerleştirebildiği için bir bölgeyi çok küçültmek o monumentlerin oluşmasını da zorlaştırabilir." Foreground="#C6D2DC" FontSize="11" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8" Padding="12">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                                <TextBlock Text="Tier 0 · Başlangıç Bölgesi" FontWeight="SemiBold" FontSize="14" Foreground="#ECF2F6"/>
+                                                <TextBlock x:Name="Tier0Value" Grid.Column="1" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14"/>
+                                            </Grid>
+                                            <TextBlock Text="Oyuncuların doğduğu, düşük riskli başlangıç alanıdır. Çok azaltırsanız uygun doğma noktaları ve başlangıç monumentleri için yeterli yer kalmayabilir." Foreground="#AEBCC8" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,9"/>
+                                            <Slider x:Name="Tier0Slider" Minimum="0" Maximum="100" TickFrequency="1" Height="22" ValueChanged="AdvancedValue_Changed" ToolTip="Başlangıç ve oyuncu spawn bölgesinin göreli alanı"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8" Padding="12">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                                <TextBlock Text="Tier 1 · Orta Seviye Bölge" FontWeight="SemiBold" FontSize="14" Foreground="#ECF2F6"/>
+                                                <TextBlock x:Name="Tier1Value" Grid.Column="1" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14"/>
+                                            </Grid>
+                                            <TextBlock Text="Başlangıç ile yüksek riskli alanlar arasındaki orta ilerleme bölgesidir. Orta seviye monument ve loot bölgelerine ayrılan alanı büyütür veya küçültür." Foreground="#AEBCC8" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,9"/>
+                                            <Slider x:Name="Tier1Slider" Minimum="0" Maximum="100" TickFrequency="1" Height="22" ValueChanged="AdvancedValue_Changed" ToolTip="Orta seviye loot ve ilerleme bölgesinin göreli alanı"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource SubCard}" Margin="0,0,0,8" Padding="12">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+                                                <TextBlock Text="Tier 2 · Yüksek Seviye Bölge" FontWeight="SemiBold" FontSize="14" Foreground="#ECF2F6"/>
+                                                <TextBlock x:Name="Tier2Value" Grid.Column="1" HorizontalAlignment="Right" Foreground="{StaticResource AccentSoftBrush}" FontWeight="Bold" FontSize="14"/>
+                                            </Grid>
+                                            <TextBlock Text="Yüksek riskli ve daha değerli bölgelerin payıdır. Artırıldığında ileri seviye monument ve loot alanları için haritada daha fazla yer ayrılır." Foreground="#AEBCC8" FontSize="10" TextWrapping="Wrap" Margin="0,4,0,9"/>
+                                            <Slider x:Name="Tier2Slider" Minimum="0" Maximum="100" TickFrequency="1" Height="22" ValueChanged="AdvancedValue_Changed" ToolTip="Yüksek seviye loot bölgesinin göreli alanı"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="#151B1A" BorderBrush="#4A3C2C" BorderThickness="1" CornerRadius="8" Padding="11" Margin="0,4,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="ÖNERİLEN DENGE" Foreground="#E0B36B" FontSize="9" FontWeight="Bold" Margin="0,0,0,5"/>
+                                            <TextBlock Text="30 / 30 / 40 dengeli başlangıç değeridir. Özellikle Tier 0'ı sıfıra veya çok düşük seviyeye indirmeyin." Foreground="#D7C3A3" FontSize="10" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="#0E1B20" BorderBrush="#2B4650" BorderThickness="1" CornerRadius="8" Padding="11" Margin="0,0,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="UYGULANACAK ORAN" Foreground="#7FA6B4" FontSize="9" FontWeight="Bold" Margin="0,0,0,5"/>
+                                            <TextBlock x:Name="TierSummaryText" Foreground="#D8E2E9" FontSize="11" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- CUSTOM PREFABS -->
+                            <Border Grid.Column="4" Style="{StaticResource Card}" VerticalAlignment="Top">
+                                <StackPanel>
+                                    <TextBlock Text="ÖZEL MONUMENT GÖRÜNÜMLERİ" Style="{StaticResource SectionTitle}" Margin="0,0,0,5"/>
+                                    <TextBlock Text="Raven Server tarafından planınıza açılan monument görünümleri listelenir. Premium içerikler yalnızca Premium abonelik aktifken görünür." Foreground="#C5CED7" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <Border Background="#111A23" BorderBrush="#2A3947" BorderThickness="1" CornerRadius="8" Padding="11" Margin="0,12,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="Dosyalar bilgisayarınızda kalıcı olarak saklanmaz. Seçilen içerik üretim sırasında güvenli biçimde alınır, doğrulanır ve işlem sonunda temizlenir." Foreground="#9FB0BF" FontSize="11" TextWrapping="Wrap"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Button Content="Yetkili Listeyi Yenile" Style="{StaticResource ButtonBase}" Click="RefreshCustomPrefabs_Click" Padding="10,7"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    <ItemsControl ItemsSource="{Binding CustomPrefabItems}">
+                                        <ItemsControl.ItemTemplate><DataTemplate>
+                                            <Border Style="{StaticResource SubCard}" Margin="0,0,0,8" Padding="12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="#ECF2F6"/>
+                                                        <TextBlock Text="{Binding PrefabAvailabilityText}" Foreground="{Binding PrefabAvailabilityColor}" FontSize="10" FontWeight="SemiBold" Margin="0,3,8,0" TextWrapping="Wrap"/>
+                                                        <TextBlock Text="{Binding PrefabStatusText}" Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="0,3,8,0" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                    <ComboBox Grid.Column="1" Margin="5,0,8,0" VerticalAlignment="Center"
+                                                              ItemsSource="{Binding PrefabOptions}" DisplayMemberPath="Name"
+                                                              SelectedValuePath="Id" SelectedValue="{Binding SelectedPrefabVariantId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate></ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Monument manager -->
+                <Grid x:Name="MonumentsPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="62"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid Margin="2,0,2,10">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Monumentler" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="Dünyanda bulunacak yapıları hızlıca ara, filtrele ve belirle." Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                        <Button Style="{StaticResource ButtonBase}" Content="Kuralları Sıfırla" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ResetRules_Click"/>
+                    </Grid>
+                    <Border Grid.Row="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,12">
+                        <UniformGrid Columns="4">
+                            <Button Style="{StaticResource StudioStepButton}" Click="GoStudio_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Dünya" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButtonActive}" IsHitTestVisible="False"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#D9572B"><TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border><TextBlock Text="Monumentler" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Icons" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Görünüm" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Validation" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="4" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Kontrol &amp; Üret" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        </UniformGrid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition Height="34"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="250"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                                <TextBox x:Name="MonumentSearch" TextChanged="Search_TextChanged" ToolTip="Monument ara"/>
+                                <ComboBox x:Name="CategoryBox" Grid.Column="1" Margin="10,0,0,0" SelectionChanged="Category_Changed" ToolTip="Kategoriye göre filtrele"/>
+                                <ComboBox x:Name="StateFilterBox" Grid.Column="2" Margin="10,0,0,0" SelectionChanged="StateFilter_Changed" ToolTip="Kural durumuna göre filtrele"/>
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="2,7,2,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Gösterilen:" Foreground="{StaticResource MutedBrush}" FontSize="10"/>
+                                    <TextBlock x:Name="FilterCountText" Text="0" Foreground="#D8E0E7" FontWeight="SemiBold" FontSize="10" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><TextBlock Text="✓ Olsun" Foreground="#58D89A" FontSize="10"/><TextBlock Text="   ? İsteğe bağlı" Foreground="#EAC95C" FontSize="10"/><TextBlock Text="   × Olmasın" Foreground="#EE747C" FontSize="10"/></StackPanel>
+                            </Grid>
+                            <ListBox x:Name="FullMonumentList" Grid.Row="2" Margin="0,10,0,0" ItemsSource="{Binding MonumentView}" ItemTemplate="{StaticResource MonumentRowTemplate}" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ListBox.ItemsPanel>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Icons -->
+                <Grid x:Name="IconsPage" Visibility="Collapsed"><Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="62"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid><StackPanel><TextBlock Text="Harita Görünümü" Style="{StaticResource PageTitle}"/><TextBlock Text="İkon temasını ve görünür harita katmanlarını yönet." Foreground="{StaticResource MutedBrush}"/></StackPanel><Button Style="{StaticResource PrimaryButton}" Content="＋ Yeni Monument" HorizontalAlignment="Right" VerticalAlignment="Center" Click="AddMonument_Click"/></Grid>
+                    <Border Grid.Row="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,12">
+                        <UniformGrid Columns="4">
+                            <Button Style="{StaticResource StudioStepButton}" Click="GoStudio_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Dünya" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Monuments" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Monumentler" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButtonActive}" IsHitTestVisible="False"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#D9572B"><TextBlock Text="3" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border><TextBlock Text="Görünüm" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Validation" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="4" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Kontrol &amp; Üret" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        </UniformGrid>
+                    </Border>
+                    <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="310"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Card}" Margin="0,0,10,0"><StackPanel><TextBlock Text="HARİTA GÖRÜNÜMÜ" Style="{StaticResource SectionTitle}"/><TextBlock Text="İkon boyutu"/><Slider x:Name="IconSizeSlider" Minimum="24" Maximum="72" Value="72" TickFrequency="2" IsSnapToTickEnabled="True" Margin="0,8" ValueChanged="IconSize_Changed"/><TextBlock x:Name="IconSizeLabel" Text="72 px" Foreground="{StaticResource AccentBrush}"/><CheckBox x:Name="ShowIconsCheck" Content="Raven ikonlarını göster" IsChecked="True" Checked="Layer_Changed" Unchecked="Layer_Changed" Margin="0,20,0,5"/><CheckBox x:Name="ShowEnvironmentCheck" Content="Çevre ve altyapı ikonlarını göster" IsChecked="True" Checked="Layer_Changed" Unchecked="Layer_Changed"/><Button Style="{StaticResource ButtonBase}" Content="Haritada Önizle" Margin="0,20,0,0" Click="GoStudio_Click"/><Border Background="#10231F" BorderBrush="#285044" BorderThickness="1" CornerRadius="7" Padding="11" Margin="0,20,0,0"><TextBlock Text="PNG · 64–512 px" Foreground="#D6A47F" TextWrapping="Wrap"/></Border></StackPanel></Border>
+                        <Border Grid.Column="1" Style="{StaticResource Card}" Padding="12"><ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding IconItems}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border Width="178" Height="146" Margin="6" Background="#121A23" BorderBrush="#2B3947" BorderThickness="1" CornerRadius="10"><Grid><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="28"/></Grid.RowDefinitions><StackPanel VerticalAlignment="Center"><Image Source="{Binding IconPath}" Width="72" Height="72" Stretch="Uniform"/><TextBlock Text="{Binding Name}" Foreground="#EAF2F8" FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="7,7,7,0"/></StackPanel><Border Grid.Row="1" Background="#111922" CornerRadius="0,0,8,8"><TextBlock Text="{Binding SourceLabel}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" FontSize="10"/></Border></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer></Border>
+                    </Grid>
+                </Grid>
+
+                <!-- History and comparison -->
+                <Grid x:Name="HistoryPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid Margin="2,0,2,10">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Üretim Kütüphanesi" Style="{StaticResource PageTitle}"/>
+                            <TextBlock Text="Önceki dünyalarını aç, karşılaştır veya güvenli biçimde yönet." Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                        <Button Style="{StaticResource ButtonBase}" Content="Yenile" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="14,8" Click="RefreshHistory_Click"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="1.05*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="0.95*"/></Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="42"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                                <Grid>
+                                    <TextBlock Text="ÜRETİM GEÇMİŞİ" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="HistoryCountText" Text="0 kayıt" Foreground="{StaticResource MutedBrush}" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
+                                <ListBox x:Name="HistoryList" Grid.Row="1" Background="Transparent" BorderThickness="0" ScrollViewer.CanContentScroll="True">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#111A23" BorderBrush="#293744" BorderThickness="1" CornerRadius="9" Padding="12" Margin="0,0,0,8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="126"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                    <Border Width="112" Height="76" CornerRadius="9" Background="#09131B" BorderBrush="#2A3A47" BorderThickness="1" ClipToBounds="True" VerticalAlignment="Top"><Image Source="{Binding ImagePath}" Stretch="UniformToFill"/></Border>
+                                                    <StackPanel Grid.Column="1" Margin="12,1,0,0">
+                                                        <TextBlock Text="{Binding DisplayName}" Foreground="#EDF3F7" FontWeight="SemiBold" FontSize="13"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0"><Border Background="{Binding SourceBackground}" CornerRadius="6" Padding="7,3" Margin="0,0,7,0"><TextBlock Text="{Binding SourceText}" Foreground="{Binding SourceColor}" FontSize="8" FontWeight="SemiBold"/></Border><TextBlock Text="{Binding GeneratedText}" Foreground="{StaticResource MutedBrush}" FontSize="10" VerticalAlignment="Center"/></StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+                                                            <TextBlock Text="{Binding SummaryText}" Foreground="#AEBBC6" FontSize="10"/>
+                                                            <TextBlock Text="  ·  " Foreground="#566573" FontSize="10"/>
+                                                            <TextBlock Text="{Binding ValidationText}" Foreground="{Binding ValidationColor}" FontSize="10" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding BackupText}" Foreground="#D9A36F" FontSize="9" Margin="0,5,0,0"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="14,0,0,0">
+                                                        <Button Style="{StaticResource PrimaryButton}" Content="Haritayı Aç" Padding="11,6" Tag="{Binding}" Click="LoadHistory_Click"/>
+                                                        <Button Style="{StaticResource ButtonBase}" Content="Klasörü Aç" Padding="11,6" Margin="0,6,0,0" Tag="{Binding}" Click="OpenHistoryFolder_Click"/>
+                                                        <Button Style="{StaticResource ButtonBase}" Content="Haritayı Sil" Foreground="#FF9B9B" BorderBrush="#71383B" Padding="11,6" Margin="0,6,0,0" Tag="{Binding}" Click="DeleteHistory_Click" ToolTip="Bu haritanın Maps içindeki tüm çıktı klasörünü kalıcı olarak sil"/>
+                                                        <Button Style="{StaticResource ButtonBase}" Content="Yedeği Aç" Padding="11,6" Margin="0,6,0,0" Tag="{Binding}" Click="OpenHistoryBackup_Click" Visibility="{Binding HasBackup, Converter={StaticResource BoolToVisibility}}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Border Grid.Row="1" Background="#111A24">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers><DataTrigger Binding="{Binding ElementName=HistoryList, Path=Items.Count}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
+                                        <Border Width="58" Height="58" CornerRadius="16" Background="#17232E" BorderBrush="#30404D" BorderThickness="1" HorizontalAlignment="Center"><Path Data="{StaticResource IconHistory}" Style="{StaticResource NavPath}" Width="25" Height="25" Stroke="#8D9BAC"/></Border>
+                                        <TextBlock Text="Henüz üretilmiş harita yok" Foreground="#E6ECF2" FontSize="17" FontWeight="SemiBold" TextAlignment="Center" Margin="0,16,0,0"/>
+                                        <TextBlock Text="İlk haritanı ürettiğinde burada açabilir, karşılaştırabilir ve yedeklerini yönetebilirsin." Foreground="{StaticResource MutedBrush}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,7,0,14"/>
+                                        <Button Style="{StaticResource PrimaryButton}" Content="Harita Studio'ya git  →" HorizontalAlignment="Center" Click="GoStudio_Click"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="86"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="KARŞILAŞTIR" Style="{StaticResource SectionTitle}" Margin="0,0,0,5"/>
+                                    <TextBlock Text="İki üretimi seçin; monument ve çevre öğelerinin adet farklarını görün." Foreground="#C5CED7" FontSize="12" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <Grid Grid.Row="1" Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Harita A" Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="1,0,0,5"/><ComboBox x:Name="CompareABox" DisplayMemberPath="DisplayName"/></StackPanel>
+                                    <StackPanel Grid.Column="2"><TextBlock Text="Harita B" Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="1,0,0,5"/><ComboBox x:Name="CompareBBox" DisplayMemberPath="DisplayName"/></StackPanel>
+                                </Grid>
+                                <Grid Grid.Row="2" Margin="0,12,0,0">
+                                    <TextBlock x:Name="CompareSummaryText" Text="Karşılaştırmak için iki üretim seçin." Foreground="{StaticResource MutedBrush}" FontSize="10" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,130,0"/>
+                                    <Button Style="{StaticResource PrimaryButton}" Content="Karşılaştır" Padding="14,7" HorizontalAlignment="Right" Click="CompareHistory_Click"/>
+                                </Grid>
+                                <Border Grid.Row="3" Background="#0D1720" BorderBrush="#30404D" BorderThickness="1" CornerRadius="10" Margin="0,13,0,0" Padding="12,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/><ColumnDefinition Width="180"/><ColumnDefinition Width="100"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center"><TextBlock Text="MONUMENT / KATMAN" Foreground="#AEBAC5" FontSize="10" FontWeight="SemiBold"/><TextBlock Text="Yalnız adedi değişen öğeler" Foreground="#718190" FontSize="9" Margin="0,4,0,0"/></StackPanel>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0"><TextBlock Text="HARİTA A" Foreground="#69BFD9" FontSize="9" FontWeight="Bold"/><TextBlock x:Name="CompareTableHeaderA" Text="Harita A" Foreground="#CDE7F0" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/><TextBlock x:Name="CompareMapNameA" Text="Harita seçilmedi" Visibility="Collapsed"/><TextBlock x:Name="CompareIconCountA" Text="" Visibility="Collapsed"/></StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="8,0"><TextBlock Text="HARİTA B" Foreground="#E5A16D" FontSize="9" FontWeight="Bold"/><TextBlock x:Name="CompareTableHeaderB" Text="Harita B" Foreground="#F1D9C8" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/><TextBlock x:Name="CompareMapNameB" Text="Harita seçilmedi" Visibility="Collapsed"/><TextBlock x:Name="CompareIconCountB" Text="" Visibility="Collapsed"/></StackPanel>
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center"><TextBlock Text="FARK" Foreground="#F09A76" FontSize="9" FontWeight="Bold"/><TextBlock x:Name="CompareChangedCount" Text="—" Foreground="#FFB08F" FontSize="20" FontWeight="SemiBold" TextAlignment="Center" Margin="0,3,0,0"/></StackPanel>
+                                </Grid>
+                                </Border>
+                                <ListBox x:Name="ComparisonList" Grid.Row="4" Margin="0,10,0,0" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/></Style></ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#101A23" BorderBrush="#2A3946" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="180"/><ColumnDefinition Width="180"/><ColumnDefinition Width="100"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" Foreground="#E2E9EF" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding CountA}" Foreground="#79D0EA" FontSize="13" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding CountB}" Foreground="#F0A979" FontSize="13" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding DifferenceText}" Foreground="{Binding DifferenceColor}" FontSize="13" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Border Grid.Row="4" Background="#111A24" Margin="0,10,0,0">
+                                    <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding ElementName=ComparisonList, Path=Items.Count}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="330">
+                                        <TextBlock Text="↔" Foreground="#617387" FontSize="32" TextAlignment="Center"/>
+                                        <TextBlock x:Name="ComparisonEmptyTitle" Text="Karşılaştırma bekleniyor" Foreground="#DDE5ED" FontSize="15" FontWeight="SemiBold" TextAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock x:Name="ComparisonEmptyDetail" Text="İki farklı harita seçildiğinde yalnız değişen monument ve katmanlar burada gösterilir." Foreground="{StaticResource MutedBrush}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- Validation -->
+                <Grid x:Name="ValidationPage" Visibility="Collapsed"><Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="62"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid Margin="2,0,2,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="Üretim Kontrolü" Style="{StaticResource PageTitle}"/><TextBlock Text="Kuralların üretilen dünyadaki sonucunu tek bakışta kontrol et." Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/></StackPanel><Button Style="{StaticResource PrimaryButton}" Content="Yeniden kontrol et" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="18,9" Click="Validate_Click"/></Grid>
+                    <Border Grid.Row="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,12">
+                        <UniformGrid Columns="4">
+                            <Button Style="{StaticResource StudioStepButton}" Click="GoStudio_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Dünya" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Monuments" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Monumentler" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButton}" Tag="Icons" Click="Navigate_Click"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#202A35"><TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Görünüm" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                            <Button Style="{StaticResource StudioStepButtonActive}" IsHitTestVisible="False"><StackPanel Orientation="Horizontal"><Border Width="24" Height="24" CornerRadius="6" Background="#D9572B"><TextBlock Text="4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/></Border><TextBlock Text="Kontrol &amp; Üret" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel></Button>
+                        </UniformGrid>
+                    </Border>
+                    <Grid Grid.Row="2"><Grid.RowDefinitions><RowDefinition Height="92"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource Card}" Padding="16"><StackPanel><TextBlock Text="KURAL" Style="{StaticResource SectionTitle}"/><TextBlock x:Name="ValidationTotalText" Text="0" Style="{StaticResource Metric}"/></StackPanel></Border>
+                            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16"><StackPanel><TextBlock Text="BAŞARILI" Style="{StaticResource SectionTitle}"/><TextBlock x:Name="ValidationSuccessText" Text="0" Style="{StaticResource Metric}" Foreground="{StaticResource SuccessBrush}"/></StackPanel></Border>
+                            <Border Grid.Column="4" Style="{StaticResource Card}" Padding="16"><StackPanel><TextBlock Text="SORUN" Style="{StaticResource SectionTitle}"/><TextBlock x:Name="ValidationErrorText" Text="0" Style="{StaticResource Metric}" Foreground="{StaticResource ErrorBrush}"/></StackPanel></Border>
+                        </Grid>
+                        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="18">
+                            <Grid>
+                                <RichTextBox x:Name="ValidationText" IsReadOnly="True" IsDocumentEnabled="False" Background="Transparent" BorderThickness="0" Padding="0" FontFamily="Segoe UI Variable Text" FontSize="13" VerticalScrollBarVisibility="Auto"><FlowDocument PagePadding="0"/></RichTextBox>
+                                <Border Background="#111A24">
+                                    <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding ElementName=ValidationTotalText, Path=Text}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="390">
+                                        <Border Width="58" Height="58" CornerRadius="16" Background="#17232E" BorderBrush="#30404D" BorderThickness="1" HorizontalAlignment="Center"><Path Data="{StaticResource IconCheck}" Style="{StaticResource NavPath}" Width="25" Height="25" Stroke="#8D9BAC"/></Border>
+                                        <TextBlock Text="Kontrol edilecek üretim yok" Foreground="#E6ECF2" FontSize="17" FontWeight="SemiBold" TextAlignment="Center" Margin="0,16,0,0"/>
+                                        <TextBlock Text="Bir harita ürettikten sonra monument ve dünya kurallarının sonuçları burada açıklanır." Foreground="{StaticResource MutedBrush}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,7,0,14"/>
+                                        <Button Style="{StaticResource PrimaryButton}" Content="Harita oluşturmaya başla  →" HorizontalAlignment="Center" Click="GoStudio_Click"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+                <!-- Settings -->
+                <Grid x:Name="SettingsPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <StackPanel Margin="2,0,2,12" VerticalAlignment="Center">
+                        <TextBlock Text="Ayarlar" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="Harita motorunu, çıktı konumunu ve proje dosyanı yönet." Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel HorizontalAlignment="Left" MaxWidth="1550">
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,12" Padding="18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="300"/><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Top">
+                                        <TextBlock Text="RUST HARİTA MOTORU" Style="{StaticResource SectionTitle}" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Harita üretiminde kullanılan yerel Rust Dedicated motoru." Foreground="#D4DCE3" FontWeight="SemiBold" FontSize="13"/>
+                                        <TextBlock Text="İlk kurulum, doğrulama ve onarım işlemlerini Raven otomatik yönetir." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBox x:Name="RustPathBox" IsReadOnly="True" FontFamily="Cascadia Mono" FontSize="11" ToolTip="Rust sunucu klasörü"/>
+                                        <TextBlock x:Name="RustEngineStatusText" Text="• Kontrol ediliyor" FontWeight="SemiBold" FontSize="11" Margin="1,10,0,0"/>
+                                        <TextBlock x:Name="RustEngineDetailText" Text="Rust Dedicated ve Harmony dosyaları kontrol ediliyor." Foreground="{StaticResource MutedBrush}" FontSize="9.5" TextWrapping="Wrap" Margin="1,4,0,0"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Style="{StaticResource ButtonBase}" Content="Klasörü Değiştir" HorizontalAlignment="Left" Padding="14,8" Click="BrowseRust_Click"/>
+                                            <Button x:Name="InstallRustEngineButton" Style="{StaticResource PrimaryButton}" Content="Harita Motorunu Kur" HorizontalAlignment="Left" Padding="14,8" Margin="8,0,0,0" Click="InstallRustEngine_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,12" Padding="18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="300"/><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Top">
+                                        <TextBlock Text="HARİTA ÇIKTI KLASÖRÜ" Style="{StaticResource SectionTitle}" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Üretilen MAP ve PNG dosyalarının kaydedileceği klasör." Foreground="#D4DCE3" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Varsayılan Maps klasörünü kullanabilir veya farklı bir konum seçebilirsiniz." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBox x:Name="OutputPathBox" IsReadOnly="True" FontFamily="Cascadia Mono" FontSize="11" ToolTip="Harita çıktı klasörü"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Style="{StaticResource ButtonBase}" Content="Klasörü Değiştir" Padding="14,8" Click="BrowseOutput_Click"/>
+                                            <Button Style="{StaticResource ButtonBase}" Content="Çıktı Klasörünü Aç" Padding="14,8" Margin="8,0,0,0" Click="OpenMaps_Click"/>
+                                            <Button Style="{StaticResource ButtonBase}" Content="Varsayılana Dön" Padding="14,8" Margin="8,0,0,0" Click="ResetOutput_Click"/>
+                                        </StackPanel>
+                                        <TextBlock x:Name="DefaultMapsText" Foreground="#718190" FontSize="9" Margin="2,9,2,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,12" Padding="18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="300"/><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Top">
+                                        <TextBlock Text="ARAZİ GÜVENLİĞİ" Style="{StaticResource SectionTitle}" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Taş ve arazi uyumunu süre sınırıyla denetler." Foreground="#D4DCE3" FontWeight="SemiBold" FontSize="13"/>
+                                        <TextBlock Text="God Rock, mağara ve tanınmayan yapılar otomatik olarak değiştirilmez." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <CheckBox x:Name="TerrainFastCheck" Content="Hızlı kontrol · önerilen · en fazla 0,75 saniye" IsChecked="True" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/>
+                                        <CheckBox x:Name="TerrainDeepCheck" Content="Derin kalite kontrolü · isteğe bağlı · en fazla 2,5 saniye" Margin="0,9,0,0" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/>
+                                        <CheckBox x:Name="TerrainSafeRepairCheck" Content="Güvenli otomatik onarım · yalnız doğrulanmış prefab profilleri" IsChecked="True" Margin="0,9,0,0" Checked="WorldFeature_Changed" Unchecked="WorldFeature_Changed"/>
+                                        <TextBlock Text="Süre dolarsa kontrol kendini durdurur; harita üretimi bekletilmez. Riskli veya bilinmeyen bir nesne silinmez, taşınmaz ya da kapatılmaz." Foreground="#718190" FontSize="9.5" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}" Padding="18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="300"/><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Top">
+                                        <TextBlock Text="HARİTA AYARLARI" Style="{StaticResource SectionTitle}" Margin="0,0,0,6"/>
+                                        <TextBlock x:Name="SettingsActiveMapName" Text="RavenHarita" Foreground="#F1F5F8" FontWeight="SemiBold" FontSize="15"/>
+                                        <TextBlock Text="Harita seçimlerini bir ayar dosyasına kaydedebilir veya daha önce kaydettiğiniz ayarları yükleyebilirsiniz." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="Kullanılan ayar dosyası" Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="1,0,0,5"/>
+                                        <TextBox x:Name="CurrentProjectText" IsReadOnly="True" FontFamily="Cascadia Mono" FontSize="10" TextWrapping="Wrap" MinHeight="48" VerticalContentAlignment="Top"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Style="{StaticResource ButtonBase}" Content="Ayar Yükle" Padding="14,8" Click="OpenProject_Click"/>
+                                            <Button Style="{StaticResource PrimaryButton}" Content="Ayarları Kaydet" Padding="14,8" Margin="8,0,0,0" Click="SaveProject_Click"/>
+                                            <Button Style="{StaticResource ButtonBase}" Content="Farklı Kaydet" Padding="14,8" Margin="8,0,0,0" Click="SaveProjectAs_Click"/>
+                                            <Button Style="{StaticResource ButtonBase}" Content="Klasörü Aç" Padding="14,8" Margin="8,0,0,0" Click="OpenCurrentProjectFolder_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Logs -->
+                <Grid x:Name="LogsPage" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid>
+                        <StackPanel><TextBlock Text="Aktivite" Style="{StaticResource PageTitle}"/><TextBlock Text="Üretimin hangi aşamada olduğunu ve önemli sonuçları takip et." Foreground="{StaticResource MutedBrush}"/></StackPanel>
+                        <Button Style="{StaticResource ButtonBase}" Content="Temizle" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ClearLog_Click"/>
+                    </Grid>
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,10" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="LogSummaryTitle" Text="SON ÜRETİM ÖZETİ" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="  ·  " Foreground="#566573"/>
+                                    <TextBlock x:Name="LogSuccessSummary" Text="Başarılı: —" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="  ·  " Foreground="#566573"/>
+                                    <TextBlock x:Name="LogFailureSummary" Text="Sorun: —" Foreground="{StaticResource ErrorBrush}" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="LogSummaryDetail" Grid.Row="1" Text="Henüz harita üretilmedi." Foreground="#B9C7D2" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <StackPanel Margin="0,0,0,9">
+                                <TextBlock Text="ÜRETİM ADIMLARI" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="Hazırlık · Üretim · Monument · Katman · Doğrulama · Sonuç" Foreground="#718190" FontSize="10" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <TextBox x:Name="FullLog" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Background="Transparent" BorderThickness="0" Foreground="#B7C9BE" FontFamily="Cascadia Mono" FontSize="11.5" Padding="8" TextAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"/>
+                            <Border Grid.Row="1" Background="#111A24">
+                                <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding ElementName=FullLog, Path=Text}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="390">
+                                    <Border Width="58" Height="58" CornerRadius="16" Background="#17232E" BorderBrush="#30404D" BorderThickness="1" HorizontalAlignment="Center"><Path Data="{StaticResource IconLogs}" Style="{StaticResource NavPath}" Width="25" Height="25" Stroke="#8D9BAC"/></Border>
+                                    <TextBlock Text="Aktivite henüz başlamadı" Foreground="#E6ECF2" FontSize="17" FontWeight="SemiBold" TextAlignment="Center" Margin="0,16,0,0"/>
+                                    <TextBlock Text="Üretim başladığında önemli aşamalar ve sonuçlar burada anlaşılır biçimde gösterilir." Foreground="{StaticResource MutedBrush}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,7,0,14"/>
+                                    <Button Style="{StaticResource PrimaryButton}" Content="Harita Studio'ya git  →" HorizontalAlignment="Center" Click="GoStudio_Click"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Border Grid.Row="2" Background="#0D141C" BorderBrush="#222D38" BorderThickness="0,1,0,0">
+            <Grid Margin="18,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="6" Height="6" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0"/><TextBlock Text="Raven License Center" Foreground="#A9B6C4" FontSize="10" FontWeight="SemiBold"/><TextBlock Text="  ·  Çevrimiçi doğrulama" Foreground="#68778A" FontSize="10"/><TextBlock x:Name="BottomAccountStatus" Text="  ·  STANDARD PAKET · Lisans: —" Foreground="#C08B66" FontSize="10" FontWeight="SemiBold"/></StackPanel>
+                <TextBlock x:Name="BottomPageStatus" Text="Başlangıç" Foreground="#657482" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="9"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

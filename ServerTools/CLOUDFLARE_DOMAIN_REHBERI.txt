@@ -1,0 +1,69 @@
+RAVENMAP - CLOUDFLARE DOMAIN YONLENDIRME KISA REHBERI
+======================================================
+
+Ornek:
+  Domain     : example.com
+  Raven API  : api.example.com
+  VDS IP     : 203.0.113.10 (buraya kendi gercek VDS IPv4 adresini yaz)
+
+1. Cloudflare Dashboard'a gir ve domainini sec.
+
+2. DNS > Records bolumune gir, Add record sec:
+     Type          : A
+     Name          : api
+     IPv4 address  : VDS'nin public IPv4 adresi
+     Proxy status  : Ilk kurulumda DNS only (gri bulut)
+     TTL           : Auto
+
+3. VDS firewall/security group tarafinda TCP 80 ve TCP 443 portlarini ac.
+   Raven'in yerel 5088 portunu internete acma.
+
+4. DNS yayildiktan sonra VDS'de KUR_RAVEN_SERVER.bat dosyasini yonetici
+   olarak calistir ve api.example.com domainini gir.
+
+5. Kurucu Caddy ile HTTPS sertifikasini aldiktan ve public /health PASS
+   olduktan sonra istersen Cloudflare DNS kaydini Proxied (turuncu bulut)
+   yapabilirsin.
+
+6. Cloudflare > SSL/TLS > Overview:
+     Encryption mode: Full (strict)
+
+   Flexible kullanma. Flexible, HTTPS yonlendirme dongusune ve origin
+   baglantisinin sifresiz kalmasina yol acabilir.
+
+7. Son kontroller:
+     https://api.example.com/health
+     https://api.example.com/admin
+
+SORUN GIDERME
+-------------
+
+DNS bulunamiyor:
+  A kaydinin adi ve VDS IP adresini kontrol et. DNS yayilimi icin bekle.
+
+80/443 erisilmiyor:
+  Windows Firewall ve VDS saglayicinin harici firewall/security group
+  kurallarini birlikte kontrol et.
+
+Cloudflare 526:
+  Origin sertifikasi henuz hazir olmayabilir veya Full (strict) origin
+  sertifikasini dogrulayamiyordur. Kaydi gecici DNS only yap, Caddy'nin
+  sertifika almasini bekle ve /health PASS sonrasinda tekrar Proxied yap.
+
+Cloudflare 502/504:
+  VDS'de RavenMapServer ve RavenMapCaddy servislerinin calistigini kontrol et.
+
+RESMI KAYNAKLAR
+---------------
+
+Cloudflare DNS kaydi:
+  https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/
+
+Cloudflare Full (strict):
+  https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/
+
+Caddy Windows service:
+  https://caddyserver.com/docs/running#windows-service
+
+Guvenlik notu: Cloudflare API tokeni bu kurulum icin gerekli degildir.
+Token, parola veya private key degerlerini TXT dosyasina yazma.

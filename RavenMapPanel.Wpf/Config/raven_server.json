@@ -1,0 +1,8 @@
+{
+  "BaseUrl": "https://api.ravenrusttr.com.tr",
+  "LicenseCenterUrl": "https://license.ravenrusttr.com.tr",
+  "LicenseProduct": "raven_map",
+  "StoreUrl": "https://www.shopier.com/ravenrust",
+  "SupportUrl": "",
+  "AllowInsecureHttpForTesting": false
+}

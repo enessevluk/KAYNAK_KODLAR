@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RavenMapPanel</AssemblyName>
+    <RootNamespace>RavenMapPanel</RootNamespace>
+    <StartupObject>RavenMapPanel.Program</StartupObject>
+    <Version>1.1.0</Version>
+    <FileVersion>1.1.0.0</FileVersion>
+    <ApplicationIcon>Assets\raven-brand-v3.ico</ApplicationIcon>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\icons\*.png" />
+    <Resource Include="Assets\backgrounds\*.jpg" />
+    <Resource Include="Assets\raven-brand-v3.png" />
+    <Resource Include="Assets\raven-brand-v3.ico" />
+    <EmbeddedResource Include="Assets\icons\*.png" />
+    <EmbeddedResource Include="Assets\config\*" />
+    <EmbeddedResource Include="Assets\data\*" />
+    <EmbeddedResource Include="Assets\HarmonyMods\*.dll" />
+    <EmbeddedResource Include="Security\*.pem" />
+    <None Include="Config\raven_server.json" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="..\RavenMapPanel.Core\RavenMapPanel.Core.csproj" />
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+</Project>

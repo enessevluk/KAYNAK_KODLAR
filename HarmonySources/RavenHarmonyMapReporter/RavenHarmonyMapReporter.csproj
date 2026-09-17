@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RavenHarmonyMapReporter</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>net48</TargetFramework>
+    <RustServerRoot Condition="'$(RustServerRoot)' == ''">C:\RavenMapServer\RustServer</RustServerRoot>
+    <RustManagedDir Condition="'$(RustManagedDir)' == ''">$(RustServerRoot)\RustDedicated_Data\Managed</RustManagedDir>
+    <PanelHarmonyModsDir Condition="'$(PanelHarmonyModsDir)' == ''">$(MSBuildProjectDirectory)\..\..\RavenMapPanel.Wpf\Assets\HarmonyMods</PanelHarmonyModsDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RustManagedDir)\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(RustManagedDir)\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RustManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="CustomGenerator">
+      <HintPath>$(PanelHarmonyModsDir)\CustomGenerator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="CopyToPanelAssets" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <MakeDir Directories="$(PanelHarmonyModsDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PanelHarmonyModsDir)" />
+  </Target>
+</Project>

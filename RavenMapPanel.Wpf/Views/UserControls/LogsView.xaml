@@ -1,0 +1,77 @@
+<UserControl x:Class="RavenMapPanel.Views.UserControls.LogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="900"
+             Background="#0B0D0C">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="18" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="SİSTEM GÜNLÜKLERİ" Style="{StaticResource HeaderTextStyle}" Foreground="#E7E8E5"/>
+                <TextBlock Text="Sunucu günlüklerini ve olayları inceleyin" Style="{StaticResource SubheaderTextStyle}" Foreground="#8F978F"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Logs Filter and Controls -->
+        <Border Grid.Row="1" Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <ComboBox x:Name="LogLevelComboBox" Style="{StaticResource ComboBoxStyle}" Width="120" Margin="0,0,10,0">
+                        <ComboBoxItem Content="Tümü"/>
+                        <ComboBoxItem Content="Hata"/>
+                        <ComboBoxItem Content="Uyarı"/>
+                        <ComboBoxItem Content="Bilgi"/>
+                    </ComboBox>
+                    
+                    <Label Content="Arama:" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="SearchTextBox" Style="{StaticResource TextBoxStyle}" Width="200" Margin="10,0,10,0"/>
+                    
+                    <Button x:Name="RefreshLogsButton" Content="Yenile" Style="{StaticResource SecondaryButtonStyle}" Width="80" Margin="0,0,10,0"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="ExportLogsButton" Content="Dışa Aktar" Style="{StaticResource SecondaryButtonStyle}" Width="100" Margin="0,0,10,0"/>
+                    <Button x:Name="ClearLogsButton" Content="Temizle" Style="{StaticResource DangerButtonStyle}" Width="80"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Logs List -->
+        <DataGrid x:Name="LogsDataGrid" 
+                  Grid.Row="2"
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Zaman" Binding="{Binding Timestamp, StringFormat='dd.MM.yyyy HH:mm:ss'}" Width="150"/>
+                <DataGridTextColumn Header="Seviye" Binding="{Binding Level}" Width="80"/>
+                <DataGridTextColumn Header="Kaynak" Binding="{Binding Source}" Width="120"/>
+                <DataGridTextColumn Header="Mesaj" Binding="{Binding Message}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="3" Background="#111411" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15" Margin="0,15,0,0">
+            <TextBlock x:Name="StatusTextBlock" Text="Hazır" Style="{StaticResource StatusTextStyle}"/>
+        </Border>
+    </Grid>
+</UserControl>

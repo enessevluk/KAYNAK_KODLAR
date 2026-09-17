@@ -1,0 +1,183 @@
+<Window x:Class="RavenMapPanel.RustEngineSetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Raven Map Studio - Harita Motoru Kurulumu"
+        Width="860" Height="650"
+        MinWidth="780" MinHeight="610"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterOwner"
+        Background="#0B1118"
+        Foreground="#EDF2F7"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        Icon="Assets/raven-brand-v3.ico">
+    <Grid Background="#0B1118">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="{StaticResource AccentBrush}"/>
+
+        <Grid Grid.Row="1" Margin="30,24,30,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="52" Height="52" CornerRadius="12" Background="#15202B"
+                        BorderBrush="#344454" BorderThickness="1" VerticalAlignment="Top">
+                    <Image Source="Assets/raven-brand-v3.png" Stretch="Uniform" Margin="5"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="14,0,18,0">
+                    <TextBlock x:Name="SetupEyebrow" Text="İLK KURULUM" FontSize="9.5" FontWeight="Bold"
+                               Foreground="{StaticResource AccentSoftBrush}"/>
+                    <TextBlock x:Name="SetupHeading" Text="Harita motorunu kur" FontSize="24" FontWeight="SemiBold" Margin="0,3,0,0"/>
+                    <TextBlock x:Name="SetupIntro"
+                               Text="Raven'ın harita üretebilmesi için gereken Rust dosyaları otomatik olarak hazırlanacak. Başka bir işlem yapmanız gerekmiyor."
+                               Foreground="#93A2B3" FontSize="11" TextWrapping="Wrap" LineHeight="17" Margin="0,5,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2" Background="#101A23" BorderBrush="#2B3946" BorderThickness="1"
+                        CornerRadius="10" Padding="12,8" VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="15–20 GB" Foreground="#E8EEF4" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="yaklaşık alan" Foreground="#778697" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,18,0,0" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="KURULUM KONUMU" FontSize="9.5" FontWeight="Bold" Foreground="#77899D"/>
+                        <TextBox x:Name="InstallPathBox" IsReadOnly="True" FontFamily="Cascadia Mono" FontSize="10.5"
+                                 MinHeight="36" Margin="0,7,0,0"/>
+                    </StackPanel>
+                    <Button x:Name="ChangeLocationButton" Grid.Column="1" Style="{StaticResource ButtonBase}"
+                            Content="Konumu değiştir" Margin="10,21,0,0" Padding="13,7"
+                            Click="ChangeLocation_Click"/>
+                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="1,8,0,0">
+                        <TextBlock x:Name="DiskSpaceText" Foreground="{StaticResource MutedBrush}" FontSize="9.5"/>
+                        <TextBlock Text="  •  Dosyalar Steam üzerinden güvenli biçimde indirilir."
+                                   Foreground="#69798A" FontSize="9.5"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0,11,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource SubCard}" Padding="14,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="36"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="15" Background="#172531" BorderBrush="#344656" BorderThickness="1">
+                            <TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="#AFC0CE"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="9,0,0,0">
+                            <TextBlock Text="Sunucu dosyaları" FontSize="10" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="RustDedicatedState" Text="Kontrol ediliyor" FontSize="10" FontWeight="SemiBold" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource SubCard}" Padding="14,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="36"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="15" Background="#172531" BorderBrush="#344656" BorderThickness="1">
+                            <TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="#AFC0CE"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="9,0,0,0">
+                            <TextBlock Text="Harita modülü" FontSize="10" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="HarmonyState" Text="Kontrol ediliyor" FontSize="10" FontWeight="SemiBold" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="4" Style="{StaticResource SubCard}" Padding="14,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="36"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Width="30" Height="30" CornerRadius="15" Background="#172531" BorderBrush="#344656" BorderThickness="1">
+                            <TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="#AFC0CE"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="9,0,0,0">
+                            <TextBlock Text="İndirme aracı" FontSize="10" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="SteamCmdState" Text="Kontrol ediliyor" FontSize="10" FontWeight="SemiBold" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="3" Style="{StaticResource Card}" Margin="0,11,0,0" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="ProgressTitle" Text="Kuruluma hazır" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock x:Name="ProgressDetail" Text="Raven gerekli bileşenleri otomatik olarak hazırlayacak."
+                                       Foreground="#91A0B0" FontSize="10.5" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <TextBlock x:Name="ProgressPercentText" Grid.Column="1" Text="0%" Foreground="{StaticResource AccentSoftBrush}"
+                                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                    </Grid>
+                    <ProgressBar x:Name="SetupProgress" Grid.Row="1" Height="7" Minimum="0" Maximum="100" Value="0" Margin="0,12,0,0"/>
+                    <Button x:Name="DetailsButton" Grid.Row="2" Style="{StaticResource ButtonBase}" Content="Ayrıntıları göster"
+                            HorizontalAlignment="Left" MinHeight="30" Padding="10,4" Margin="0,10,0,0" Click="Details_Click"/>
+                    <Border x:Name="InstallLogPanel" Grid.Row="3" Background="#0A121A" BorderBrush="#243440" BorderThickness="1"
+                            CornerRadius="8" Padding="10,7" Margin="0,8,0,0" Visibility="Collapsed">
+                        <TextBox x:Name="InstallLog" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Padding="0"
+                                 Foreground="#9EB1C0" FontFamily="Cascadia Mono" FontSize="9.5" MaxHeight="90"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="4" Margin="0,15,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="FooterHint" Text="Kurulum sırasında internet bağlantısı gereklidir."
+                               Foreground="#8795A5" FontSize="9.5"/>
+                    <TextBlock Text="Kurulumu yarıda bırakırsanız indirilen dosyalar korunur."
+                               Foreground="#617181" FontSize="9" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button x:Name="LaterButton" Grid.Column="1" Style="{StaticResource ButtonBase}" Content="Daha sonra"
+                        Padding="17,9" Margin="0,0,9,0" Click="Later_Click"/>
+                <Button x:Name="InstallButton" Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Şimdi kur"
+                        Padding="22,9" Click="Install_Click"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

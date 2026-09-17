@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+Release/
+OWNER_SECRETS/
+**/KeyBackups/
+**/.vs/
+**/TestResults/
+**/artifacts/
+**/publish/
+**/*private*.pem
+**/*.pfx
+**/*.p12
+**/*.key
+.env
+.env.*
+*.user
+*.suo

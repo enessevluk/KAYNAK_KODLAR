@@ -1,0 +1,87 @@
+<UserControl x:Class="RavenMapPanel.Views.UserControls.UpdatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="900"
+             Background="#0B0D0C">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="18" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="GÜNCELLEMELER" Style="{StaticResource HeaderTextStyle}" Foreground="#E7E8E5"/>
+                <TextBlock Text="Sunucu güncellemelerini yönetin ve yükleyin" Style="{StaticResource SubheaderTextStyle}" Foreground="#8F978F"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Updates List -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="250"/>
+            </Grid.ColumnDefinitions>
+            
+            <DataGrid x:Name="UpdatesDataGrid" 
+                      Grid.Column="0"
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      Margin="0,0,10,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Sürüm" Binding="{Binding Version}" Width="100"/>
+                    <DataGridTextColumn Header="Tarih" Binding="{Binding ReleaseDate, StringFormat='dd.MM.yyyy'}" Width="120"/>
+                    <DataGridTextColumn Header="Boyut" Binding="{Binding Size, Converter={StaticResource FileSizeConverter}}" Width="100"/>
+                    <DataGridTextColumn Header="Açıklama" Binding="{Binding Description}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            
+            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                <Border Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Yeni Güncelleme" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,10"/>
+                        
+                        <Label Content="Sürüm Numarası" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="VersionTextBox" Style="{StaticResource TextBoxStyle}" Margin="0,0,0,10"/>
+                        
+                        <Label Content="Açıklama" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="DescriptionTextBox" Style="{StaticResource TextBoxStyle}" TextWrapping="Wrap" Height="80" Margin="0,0,0,10"/>
+                        
+                        <Button x:Name="CreateUpdateButton" Content="Güncelleme Oluştur" 
+                                Style="{StaticResource PrimaryButtonStyle}" Width="150" Margin="0,0,0,10"/>
+                        
+                        <Button x:Name="CheckUpdatesButton" Content="Güncellemeleri Kontrol Et" 
+                                Style="{StaticResource SecondaryButtonStyle}" Width="150"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Background="#151816" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="Güncelleme İşlemleri" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,10"/>
+                        
+                        <Button x:Name="DownloadUpdateButton" Content="İndir ve Yükle" 
+                                Style="{StaticResource PrimaryButtonStyle}" Width="150" Margin="0,0,0,10"/>
+                        
+                        <Button x:Name="RollbackUpdateButton" Content="Geri Al" 
+                                Style="{StaticResource SecondaryButtonStyle}" Width="150"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#111411" BorderBrush="#2D322E" BorderThickness="1" CornerRadius="2" Padding="15" Margin="0,15,0,0">
+            <TextBlock x:Name="StatusTextBlock" Text="Hazır" Style="{StaticResource StatusTextStyle}"/>
+        </Border>
+    </Grid>
+</UserControl>

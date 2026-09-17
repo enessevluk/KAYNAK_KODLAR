@@ -1,0 +1,68 @@
+{
+  "format": "raven-custom-prefab-definitions-v3",
+  "definitions": [
+    {
+      "monumentId": "outpost",
+      "targets": [
+        "compound.prefab.map"
+      ],
+      "bundledFiles": [
+        {
+          "resource": "rustmaps_outpost_template.map",
+          "target": "compound.prefab.map"
+        }
+      ]
+    },
+    {
+      "monumentId": "bandit_camp",
+      "targets": [
+        "bandit_town.prefab.map"
+      ],
+      "bundledFiles": [
+        {
+          "resource": "rustmaps_bandit_camp_template.map",
+          "target": "bandit_town.prefab.map"
+        }
+      ]
+    },
+    {
+      "monumentId": "stables",
+      "targets": [
+        "stables_a.prefab.map",
+        "stables_b.prefab.map"
+      ],
+      "bundledFiles": [
+        {
+          "resource": "rustmaps_stables_a_template.map",
+          "target": "stables_a.prefab.map"
+        },
+        {
+          "resource": "rustmaps_stables_b_template.map",
+          "target": "stables_b.prefab.map"
+        }
+      ]
+    },
+    {
+      "monumentId": "fishing_village",
+      "targets": [
+        "fishing_village_a.prefab.map",
+        "fishing_village_b.prefab.map",
+        "fishing_village_c.prefab.map"
+      ],
+      "bundledFiles": [
+        {
+          "resource": "rustmaps_fishing_village_a_template.map",
+          "target": "fishing_village_a.prefab.map"
+        },
+        {
+          "resource": "rustmaps_fishing_village_b_template.map",
+          "target": "fishing_village_b.prefab.map"
+        },
+        {
+          "resource": "rustmaps_fishing_village_c_template.map",
+          "target": "fishing_village_c.prefab.map"
+        }
+      ]
+    }
+  ]
+}
